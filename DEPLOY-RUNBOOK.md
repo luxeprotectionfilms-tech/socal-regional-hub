@@ -55,8 +55,14 @@ shape `LUXE SoCal Hub — Request an installation quote — Jane Doe`. Hitting
 
 ## Step 2 · Create the repository
 
-1. Under the **LUXE GitHub organization**, create a repository. Public or
-   private both work; GitHub Pages serves from either on current plans.
+1. Under the **LUXE GitHub organization**, create a repository. **Make it
+   Public.** On GitHub Free (including Free for organizations), Pages only
+   publishes from public repositories — private-repo Pages requires Pro, Team,
+   or Enterprise. Public here means the source files are visible, which for a
+   static marketing page is not a real exposure: everything in this build is
+   already served to every visitor's browser anyway. Nothing secret lives in
+   the repo — the form endpoint is a public submission URL by design, and there
+   are no keys or credentials.
 2. Push the **entire contents** of the unzipped build to the `main` branch, at
    the repository root. `index.html` must sit at the top level — not inside a
    subfolder. This is the single most common way this step goes wrong.
