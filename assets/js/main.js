@@ -46,15 +46,20 @@
       });
     }
 
-    // Phone text
-    if (set(CFG.phone)) {
+    // Phone. If no number is configured, every phone affordance is removed
+    // rather than left showing a placeholder — a dead "Call" button is worse
+    // than no button, and a fake number is worse than both.
+    if (set(CFG.phone) && set(CFG.phoneE164)) {
       all('[data-site="phone"]').forEach(function (el) { el.textContent = CFG.phone; });
-    }
-
-    // Phone links
-    if (set(CFG.phoneE164)) {
       all('[data-site="phone-link"]').forEach(function (el) {
         el.setAttribute("href", "tel:" + CFG.phoneE164.replace(/[^\d+]/g, ""));
+      });
+    } else {
+      all('[data-site="phone-link"]').forEach(function (el) {
+        var row = el.closest("li") || el.closest("div");
+        if (row && row.querySelector("dt")) { row.style.display = "none"; }
+        else if (row && row.tagName === "LI") { row.style.display = "none"; }
+        else { el.style.display = "none"; }
       });
     }
 
@@ -67,15 +72,12 @@
       else if (el.parentNode) { el.parentNode.style.display = 'none'; }
     });
 
-    // Optional story overrides — only applied when a value is supplied
-    ['storyLede','story1Year','story1Title','story1Body',
-     'story2Year','story2Title','story2Body',
-     'story3Year','story3Title','story3Body'].forEach(function (k) {
-      var v = CFG[k];
-      if (typeof v === 'string' && v.trim() !== '') {
-        all('[data-site="' + k + '"]').forEach(function (el) { el.textContent = v; });
-      }
-    });
+    // Privacy policy destination
+    if (set(CFG.privacyUrl)) {
+      all('[data-site="privacy"]').forEach(function (el) {
+        el.setAttribute("href", CFG.privacyUrl);
+      });
+    }
 
     all('[data-site="directions"]').forEach(function (el) {
       if (dir) {
@@ -277,7 +279,7 @@
   */
 
   var PURPOSE_MAP = {
-    showroom: "Book a showroom visit",
+    showroom: "Request a showroom visit",
     quote:    "Request an installation quote",
     stock:    "Check local film availability",
     dealer:   "Dealer or installer support"
@@ -340,6 +342,22 @@
   });
   all('[data-site="directions"]').forEach(function (el) {
     el.addEventListener("click", function () { track("directions_click"); });
+  });
+  all('[data-site="instagram"]').forEach(function (el) {
+    el.addEventListener("click", function () { track("instagram_click"); });
+  });
+
+  // Outbound clicks to the LUXE product catalogue — tells LUXE which lines
+  // the regional traffic is actually researching.
+  all('.film__link').forEach(function (el) {
+    el.addEventListener("click", function () {
+      var card = el.closest(".film, .cway, .range__item");
+      var heading = card ? card.querySelector("h3, h4") : null;
+      track("product_outbound_click", {
+        product: heading ? heading.textContent.trim() : "",
+        url: el.getAttribute("href") || ""
+      });
+    });
   });
 
 })();

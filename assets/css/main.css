@@ -374,20 +374,31 @@ em {
   text-transform: uppercase;
   color: var(--white);
   max-width: 15ch;
-  margin-bottom: var(--sp-5);
+  margin-bottom: var(--sp-4);
+  text-wrap: balance;
 }
 
 .hero__lede {
-  font-size: clamp(1rem, 0.94rem + 0.3vw, 1.1875rem);
+  font-size: clamp(1rem, 0.94rem + 0.3vw, 1.125rem);
   color: #C9C9CE;
-  max-width: 48ch;
+  max-width: 44ch;
+  text-wrap: pretty;
 }
 
 .hero__actions {
   display: flex;
   flex-wrap: wrap;
   gap: var(--sp-3);
-  margin-top: var(--sp-6);
+  margin-top: var(--sp-5);
+}
+
+/* Three routes in the hero — keep them on one line on desktop,
+   stacked and full-width on phones so none of them get cramped. */
+.hero__actions--three .btn { flex: 0 1 auto; }
+
+@media (max-width: 720px) {
+  .hero__actions--three { flex-direction: column; align-items: stretch; gap: var(--sp-2); }
+  .hero__actions--three .btn { width: 100%; }
 }
 
 .hero__scroll {
@@ -527,10 +538,14 @@ em {
 .stock__vignette {
   position: absolute;
   inset: 0;
-  z-index: -1;
+  /* Must be POSITIVE. Inside .stock__media's stacking context a negative
+     z-index paints beneath non-positioned block children — i.e. beneath the
+     <img> — so the scrim did nothing. .stock__media is itself at z-index:-2,
+     so a positive value here still stays behind the panel copy. */
+  z-index: 1;
   background:
-    linear-gradient(to right, rgba(11,11,12,.94) 0%, rgba(11,11,12,.86) 42%, rgba(11,11,12,.55) 100%),
-    linear-gradient(to bottom, rgba(11,11,12,.70), rgba(11,11,12,.70));
+    linear-gradient(to right, rgba(11,11,12,.95) 0%, rgba(11,11,12,.90) 34%, rgba(11,11,12,.62) 66%, rgba(11,11,12,.42) 100%),
+    linear-gradient(to bottom, rgba(11,11,12,.28), rgba(11,11,12,.28));
 }
 
 .stock__panel {
@@ -539,13 +554,20 @@ em {
   gap: clamp(2.5rem, 1rem + 5vw, 5rem);
   align-items: start;
 }
-.stock__copy { max-width: 48ch; padding-top: var(--sp-2); }
-.stock__copy .muted { margin-top: var(--sp-5); }
+.stock__copy {
+  max-width: 48ch;
+  padding: var(--sp-5) var(--sp-5) var(--sp-5) 0;
+}
+.stock__copy p { color: var(--text); }
+.stock__copy p + p { margin-top: var(--sp-4); }
+
 
 @media (max-width: 900px) {
   .stock__panel { grid-template-columns: 1fr; }
+  .stock__copy { padding: var(--sp-4) 0; }
+  .stock__copy::before { display: none; }
   .stock__vignette {
-    background: linear-gradient(to bottom, rgba(11,11,12,.90), rgba(11,11,12,.95));
+    background: linear-gradient(to bottom, rgba(11,11,12,.93), rgba(11,11,12,.97));
   }
 }
 
@@ -893,6 +915,17 @@ em {
 
 .actionbar { display: none; }
 
+/* The bar is fixed over the page, so the document needs matching
+   clearance or it covers the last form field, the submit button, and
+   the footer disclaimer. 64px bar + safe-area inset + breathing room. */
+@media (max-width: 720px) {
+  body { padding-bottom: calc(64px + env(safe-area-inset-bottom)); }
+  .site-footer { padding-bottom: var(--sp-5); }
+  /* Anchored jumps shouldn't land under the sticky header either. */
+  :target { scroll-margin-top: 84px; }
+  .form .btn[type="submit"] { scroll-margin-bottom: calc(88px + env(safe-area-inset-bottom)); }
+}
+
 @media (max-width: 720px) {
   .actionbar {
     position: fixed;
@@ -972,7 +1005,7 @@ em {
 }
 
 /* ══════════════════════════════════════════════════
-   COLLECTION · SPECS, COLOURWAYS, RANGE, TIMELINE
+   COLLECTION · SPECS, COLORWAYS, RANGE, FACILITY
    ══════════════════════════════════════════════════ */
 
 .h2--sm{font-size:clamp(1.5rem,3vw,2.1rem)}
@@ -989,7 +1022,7 @@ em {
 .film__link:hover,.film__link:focus-visible{border-bottom-color:var(--gold);color:#fff}
 .film__link span{font-size:.9em}
 
-/* Colourway block */
+/* Colorway block */
 .colorway{margin-top:5rem;padding-top:3.5rem;border-top:1px solid var(--line)}
 .colorway__head{max-width:60ch;margin-bottom:2.5rem}
 .colorway__grid{display:grid;gap:1.5rem;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
@@ -1008,6 +1041,14 @@ em {
 
 /* ── Story timeline ── */
 .story{background:var(--surface)}
+/* Facility / Capability / Regional Support — factual columns. */
+.facts{display:grid;gap:2rem;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+.fact{position:relative;padding-top:2.2rem;border-top:1px solid var(--line)}
+.fact::before{content:"";position:absolute;top:-1px;left:0;width:44px;height:2px;background:var(--gold)}
+.fact__t{font-family:var(--font-display);font-size:.78rem;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--gold);font-weight:700;margin:0 0 .8rem}
+.fact p{color:var(--muted);margin:0}
+
 .timeline{list-style:none;margin:0;padding:0;display:grid;gap:2rem;
   grid-template-columns:repeat(auto-fit,minmax(260px,1fr));counter-reset:tl}
 .tl{position:relative;padding-top:2.2rem;border-top:1px solid var(--line)}
@@ -1021,6 +1062,7 @@ em {
   .colorway{margin-top:3.5rem;padding-top:2.5rem}
   .cway{padding:1.3rem}
   .timeline{gap:1.75rem}
+  .facts{gap:1.75rem}
 }
 
 /* ══════════ SHOWROOM GALLERY ══════════ */

@@ -6,45 +6,55 @@
    Everything below is applied automatically across the page,
    the footer, the mobile action bar, and the JSON-LD structured
    data. You do not need to touch index.html.
+   ============================================================ */
 
-   Replace every value marked PENDING.
+/* CONFIRMED BY RAVI — 5 August 2026
+   ────────────────────────────────────────────────────────────
+   Phone ......... (818) 826-9695
+   Instagram ..... @gravitygarage_
+   Business name . Gravity Garage
+   Hours ......... Mon–Fri 9:00am–5:00pm, weekends closed
+
+   Still open: a dedicated hub email address (falls back to
+   corporate@luxeprotectionfilms.com) and a named hub staff contact
+   for lead routing. Neither blocks launch.
+
+   If any value here is blanked out, the site hides that element
+   rather than showing a placeholder.
    ============================================================ */
 
 window.SITE_CONFIG = {
 
   /* ---------- 1 · BUSINESS DETAILS ------------------------ */
 
-  // Displayed exactly as typed. Example: "12345 Example Ave, Suite 1, Anaheim, CA 92805"
+  // Displayed exactly as typed.
   address: "27820 Fremont Ct, Ste 1, Valencia, CA 91355",
 
-  // Human-readable phone. Example: "(714) 555-0142"
+  // Confirmed. Blank both to hide every phone affordance
+  // (footer, Visit block, mobile Call button).
   phone: "(818) 826-9695",
-
-  // Same number in E.164 for tel: links. Digits only, leading +1.
-  // Example: "+17145550142"
   phoneE164: "+18188269695",
 
-  // Displayed exactly as typed. Use \n for line breaks if needed.
-  // Example: "Mon–Fri 9:00am – 6:00pm · Sat by appointment"
+  // Displayed exactly as typed. Use \n for line breaks.
   hours: "Mon–Fri 9:00am – 5:00pm\nSaturday & Sunday closed",
 
   // Machine-readable hours for Google structured data (JSON-LD).
-  // Keep in sync with the `hours` string above. Omit closed days entirely.
+  // Confirmed by Ravi 5 Aug 2026. Keep in sync with `hours` above and
+  // with the Google Business Profile — if these three disagree, Google
+  // distrusts all of them.
   openingHoursSpec: [
     { days: ["Monday","Tuesday","Wednesday","Thursday","Friday"], opens: "09:00", closes: "17:00" }
   ],
 
   // Full Google Maps link for the "Get Directions" buttons.
-  // Easiest method: search the address on Google Maps → Share → Copy link.
   // If left blank, the address above is used to build a search URL.
   directionsUrl: "",
 
-  // Gravity Garage social profiles (leave "" to hide the link)
+  // Confirmed. Leave "" to hide the link entirely.
   instagramUrl: "https://www.instagram.com/gravitygarage_",
 
 
   /* ---------- 2 · STRUCTURED DATA (SEO) ------------------- */
-  // Used to fill the JSON-LD block. Improves Google Business results.
 
   streetAddress: "27820 Fremont Ct, Ste 1",
   addressLocality: "Valencia",   // City
@@ -54,25 +64,31 @@ window.SITE_CONFIG = {
 
   /* ---------- 3 · FORM DELIVERY --------------------------- */
   /*
-     Where form submissions are sent.
+     Where form submissions are sent. Any endpoint accepting a POST
+     works — Zoho Forms, a Zoho CRM webform, Formspree, a Zapier
+     catch hook, or a custom handler.
 
-     RECOMMENDED — Formspree (free tier available, 5 min setup):
-       1. Create an account at formspree.io using a LUXE-controlled
-          email address (this keeps lead data under LUXE control).
-       2. Create a new form. Copy the endpoint URL.
-       3. Paste it below. Example:
-          formEndpoint: "https://formspree.io/f/xldpwkqz"
+     PREFERRED — a LUXE-controlled Zoho endpoint, so lead data lands
+     directly in the CRM that LUXE owns.
 
-     ALTERNATIVE — any endpoint that accepts a JSON POST.
-
-     If this is left blank, the forms fall back to opening the
-     visitor's email client with the details pre-filled, addressed
-     to fallbackEmail below. The site still works either way.
+     Zoho and most classic form handlers expect url-encoded fields
+     rather than a JSON body. Set formEncoding to "form" for those.
   */
   formEndpoint: "",
+  formEncoding: "json",          // "json" or "form"
 
-  // Used only for the mailto fallback described above.
-  fallbackEmail: "info@luxeprotectionfilms.com",
+  // Set to true only once the endpoint's autoresponder is switched on.
+  // Controls whether the success message promises a confirmation email.
+  autoResponse: false,
+
+  // Stamped onto every submission so the CRM can attribute the lead.
+  leadSource: "Gravity Garage Regional Hub Website",
+
+  // Used only for the mailto fallback when formEndpoint is blank.
+  fallbackEmail: "corporate@luxeprotectionfilms.com",
+
+  // Linked from the consent line beneath both forms.
+  privacyUrl: "https://luxeprotectionfilms.com/privacy-policy/",
 
 
   /* ---------- 4 · ANALYTICS ------------------------------- */
@@ -81,18 +97,10 @@ window.SITE_CONFIG = {
      Paste the Measurement ID (looks like "G-XXXXXXXXXX").
      Leave blank to disable analytics entirely — nothing loads,
      no third-party requests are made.
+
+     Must be a LUXE-owned property. Grant Gravity Garage Viewer
+     access; do not use an analytics property they own.
   */
-
-  /* ────────────────────────────────────────────────
-     GRAVITY GARAGE STORY  (optional)
-     Leave any value as "" to keep the default wording
-     already written into index.html.
-     ──────────────────────────────────────────────── */
-  storyLede:   "",
-  story1Year:  "",   story1Title: "",   story1Body: "",
-  story2Year:  "",   story2Title: "",   story2Body: "",
-  story3Year:  "",   story3Title: "",   story3Body: "",
-
   analyticsId: ""
 
 };

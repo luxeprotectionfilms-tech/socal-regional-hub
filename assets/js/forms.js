@@ -16,6 +16,57 @@
   var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   var DIGITS_RE = /\d/g;
 
+  /* ---------- attribution ----------
+     UTM values are captured on first page view and held for the session,
+     so a visitor who lands from a campaign, browses, and only submits
+     three pages later still carries the correct source. Without this the
+     UTMs are lost the moment they click an internal link.
+     sessionStorage is used deliberately: it is first-party, cleared when
+     the tab closes, and holds no personal data. */
+
+  var UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
+  var STORE_KEY = "luxe_hub_attribution";
+
+  function readStore() {
+    try { return JSON.parse(window.sessionStorage.getItem(STORE_KEY)) || {}; }
+    catch (e) { return {}; }
+  }
+
+  function attribution() {
+    var saved = readStore();
+    var params;
+    try { params = new URLSearchParams(window.location.search); }
+    catch (e) { params = null; }
+
+    var fresh = {};
+    if (params) {
+      UTM_KEYS.forEach(function (k) {
+        var v = params.get(k);
+        if (v) fresh[k] = v.slice(0, 200);
+      });
+    }
+
+    // First touch wins unless this visit carries new campaign parameters.
+    if (Object.keys(fresh).length) {
+      if (!saved.referrer) fresh.referrer = document.referrer || "";
+      if (!saved.landing_page) fresh.landing_page = window.location.href;
+      try { window.sessionStorage.setItem(STORE_KEY, JSON.stringify(fresh)); } catch (e) {}
+      return fresh;
+    }
+
+    if (!Object.keys(saved).length) {
+      saved = { referrer: document.referrer || "", landing_page: window.location.href };
+      try { window.sessionStorage.setItem(STORE_KEY, JSON.stringify(saved)); } catch (e) {}
+    }
+    return saved;
+  }
+
+  // Capture on page load, not at submit time. By the time someone fills in a
+  // form they have usually clicked through to an internal anchor, and the
+  // campaign parameters are no longer in the URL — running this only at
+  // submit silently loses every UTM.
+  attribution();
+
   /* ---------- validation ---------- */
 
   function messageFor(field) {
@@ -82,17 +133,53 @@
       var value = (field.value || "").trim();
       if (value) data[field.name] = value;
     });
-    data.page = window.location.href;
-    data.submitted = new Date().toISOString();
+    /* ---- lead routing + attribution ----
+       These field names are what the CRM maps against. Changing them
+       means remapping the destination form, so keep them stable. */
+
+    var attr = attribution();
+
+    data.lead_source  = CFG.leadSource || "Gravity Garage Regional Hub Website";
+    data.inquiry_type = data.purpose || INQUIRY_BY_FORM[formName] || "General enquiry";
+    data.page_url     = window.location.href;
+    data.referring_url = attr.referrer || document.referrer || "";
+    data.landing_page = attr.landing_page || "";
+    data.utm_source   = attr.utm_source   || "";
+    data.utm_medium   = attr.utm_medium   || "";
+    data.utm_campaign = attr.utm_campaign || "";
+    data.utm_content  = attr.utm_content  || "";
+    data.utm_term     = attr.utm_term     || "";
+    data.submitted_at = new Date().toISOString();
+
+    // Kept for backwards compatibility with the original payload shape.
+    data.page = data.page_url;
+    data.submitted = data.submitted_at;
 
     // Formspree-specific hints: make the notification email readable and
     // let "Reply" go straight back to the enquirer. Harmless on other
     // endpoints, which simply ignore keys they don't recognise.
-    data._subject = "LUXE SoCal Hub — " + (data.purpose || formName) +
+    data._subject = "LUXE SoCal Hub — " + data.inquiry_type +
                     (data.name ? " — " + data.name : "");
     if (data.email) data._replyto = data.email;
 
     return data;
+  }
+
+  var INQUIRY_BY_FORM = {
+    availability: "Local film availability",
+    contact: "General enquiry"
+  };
+
+  /* Some endpoints (Zoho Forms / Zoho CRM webforms, and most classic
+     form handlers) expect url-encoded fields rather than a JSON body.
+     Set formEncoding: "form" in site-config.js for those. */
+  function encodeBody(data) {
+    if ((CFG.formEncoding || "json").toLowerCase() === "form") {
+      var params = new URLSearchParams();
+      Object.keys(data).forEach(function (k) { params.append(k, data[k]); });
+      return { body: params.toString(), type: "application/x-www-form-urlencoded" };
+    }
+    return { body: JSON.stringify(data), type: "application/json" };
   }
 
   function mailtoFallback(data, formName) {
@@ -131,6 +218,8 @@
   function wire(form, formName) {
     if (!form) return;
 
+    var loadedAt = Date.now();
+
     // Clear the error the moment the visitor starts fixing it.
     all("input, select, textarea", form).forEach(function (field) {
       field.addEventListener("input", function () {
@@ -152,6 +241,15 @@
         return;
       }
 
+      // Time trap. A human cannot read these fields and fill them in under
+      // two seconds; scripted submissions routinely do it in milliseconds.
+      // Silently accepted so bots get no signal about why it failed.
+      if (Date.now() - loadedAt < 2000) {
+        status(form, "Thanks — your request has been received.", "ok");
+        form.reset();
+        return;
+      }
+
       status(form, "");
       if (!validateForm(form)) {
         status(form, "Please check the highlighted fields.", "error");
@@ -166,7 +264,7 @@
       if (!set(CFG.formEndpoint)) {
         if (mailtoFallback(data, formName)) {
           status(form, "Opening your email app to send this request…", "ok");
-          track("form_submit", { form: formName, method: "mailto" });
+          track("form_submit", { form: formName, method: "mailto", inquiry_type: data.inquiry_type });
         } else {
           status(form, "This form isn't connected yet. Please call us instead.", "error");
         }
@@ -176,20 +274,33 @@
       if (button) { button.disabled = true; button.textContent = "Sending…"; }
       status(form, "Sending your request…");
 
+      var payload = encodeBody(data);
+
       fetch(CFG.formEndpoint, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Accept": "application/json" },
-        body: JSON.stringify(data)
+        headers: { "Content-Type": payload.type, "Accept": "application/json" },
+        body: payload.body
       })
         .then(function (res) {
           if (!res.ok) throw new Error("Request failed: " + res.status);
           form.reset();
-          status(form, "Thank you — your request has been sent. We'll be in touch shortly.", "ok");
-          track("form_submit", { form: formName, method: "endpoint", purpose: data.purpose || "" });
+          // Only promise an acknowledgement email once one actually exists.
+          // Set autoResponse: true in site-config.js after the endpoint's
+          // autoresponder is switched on.
+          status(form, CFG.autoResponse
+            ? "Thank you — your request has been received. A confirmation is on its way to " +
+              (data.email || "your inbox") + ", and the team will follow up shortly."
+            : "Thank you — your request has been received. The team will follow up shortly.", "ok");
+          track("form_submit", {
+            form: formName,
+            method: "endpoint",
+            inquiry_type: data.inquiry_type,
+            purpose: data.purpose || ""
+          });
         })
         .catch(function () {
-          status(form, "Something went wrong sending that. Please call us and we'll take care of it.", "error");
-          track("form_error", { form: formName });
+          status(form, "That didn't send. Please try again in a moment, or call the hub and we'll take care of it.", "error");
+          track("form_error", { form: formName, inquiry_type: data.inquiry_type });
         })
         .then(function () {
           if (button) { button.disabled = false; button.textContent = originalLabel; }
