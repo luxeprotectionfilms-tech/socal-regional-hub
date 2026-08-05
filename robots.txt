@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://gravitygarage.luxeprotectionfilms.com/sitemap.xml
