@@ -522,9 +522,9 @@ em {
 }
 
 .obj { width: 100%; height: auto; }
-.obj--hub      { aspect-ratio: 16 / 10; object-fit: cover; object-position: center 42%; }
-.obj--plotter  { aspect-ratio: 16 / 10; object-fit: cover; object-position: center 55%; }
-.obj--sign     { aspect-ratio: 4 / 5;   object-fit: cover; object-position: center 46%; }
+.obj--hub      { aspect-ratio: 4 / 3;   object-fit: cover; object-position: center 50%; }
+.obj--plotter  { aspect-ratio: 16 / 9;  object-fit: cover; object-position: center 50%; }
+.obj--sign     { aspect-ratio: 5 / 3;   object-fit: cover; object-position: center 50%; }
 
 .split__media--portrait picture { max-width: 460px; }
 
@@ -533,7 +533,7 @@ em {
   .split__grid--tight { grid-template-columns: 1fr; gap: var(--sp-7); }
   .split--rev .split__grid { direction: ltr; }
   .split__media--portrait picture { max-width: 100%; }
-  .obj--sign { aspect-ratio: 3 / 2; }
+  .obj--sign { aspect-ratio: 5 / 3; }
   /* Image first on mobile for the About block reads better after the heading */
   #about .split__media { order: 2; }
   #about .split__text  { order: 1; }
@@ -1329,3 +1329,32 @@ section[id], div[id="availability"], div[id="stocked"] { scroll-margin-top: 96px
 .film__cta:hover { background: var(--gold); color: #0B0B0C; border-color: var(--gold); }
 .film__link--out { font-size: .78rem; color: var(--muted-2); border-bottom-color: transparent; }
 .film__link--out:hover { color: var(--muted); }
+
+/* Product photography inside the locally-stocked block. */
+.stocked__media {
+  margin-top: var(--sp-6);
+  /* Full-bleed here swamps the swatch row above it. Held to the reading
+     width so it reads as supporting evidence, not a hero. */
+  max-width: 760px;
+}
+.stocked__media img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+}
+.stocked__media figcaption {
+  margin-top: var(--sp-3);
+  font-size: 0.875rem;
+  color: var(--muted);
+  max-width: 68ch;
+}
+
+/* The About sign shot is landscape now, not the old portrait plate. */
+.split__media--portrait .obj--sign { aspect-ratio: 5 / 3; object-fit: cover; }
+.split__media--portrait figcaption {
+  margin-top: var(--sp-3);
+  font-size: 0.8125rem;
+  color: var(--muted-2);
+}
