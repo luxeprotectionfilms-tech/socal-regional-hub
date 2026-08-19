@@ -1115,13 +1115,17 @@ em {
 .colorway__pack img{width:auto;max-width:100%;height:auto;max-height:250px;object-fit:contain}
 
 .range--cards{align-items:start}
+/* The Glide block carries the full product range plus a shelf photo, so it
+   takes the whole row and a media column wide enough for a square packshot.
+   The old 170px / 230px-tall slot was sized for a single upright bottle. */
 .range__item--media{border-top:0;padding:0;background:var(--surface);
   border:1px solid var(--line);border-radius:var(--r,10px);overflow:hidden;
-  display:grid;grid-template-columns:170px 1fr;gap:1.2rem;align-items:center}
-.range__item--media .packshot{background:#fff;height:100%;display:flex;
-  align-items:center;justify-content:center;padding:.9rem}
-.range__item--media .packshot img{width:100%;height:230px;object-fit:contain;display:block}
-.range__body{padding:1.3rem 1.3rem 1.3rem 0}
+  grid-column:1 / -1;
+  display:grid;grid-template-columns:minmax(260px,340px) 1fr;gap:1.6rem;align-items:start}
+.range__item--media .packshot{background:#fff;display:flex;
+  align-items:center;justify-content:center;padding:1.2rem;align-self:stretch}
+.range__item--media .packshot img{width:100%;height:auto;max-height:340px;object-fit:contain;display:block}
+.range__body{padding:1.6rem 1.6rem 1.6rem 0}
 .range__body .cway__t{border-bottom:0;padding-bottom:.2rem;margin-bottom:.5rem}
 
 .visit__social{margin:1rem 0 0}
@@ -1131,10 +1135,10 @@ em {
 
 @media (max-width:640px){
   .colorway__pack img{max-height:170px}
-  .range__item--media{grid-template-columns:1fr}
-  .range__item--media .packshot{padding:1.2rem}
-  .range__item--media .packshot img{height:250px}
-  .range__body{padding:0 1.3rem 1.3rem}
+  .range__item--media{grid-template-columns:1fr;gap:0}
+  .range__item--media .packshot{padding:1.4rem}
+  .range__item--media .packshot img{max-height:260px}
+  .range__body{padding:1.3rem}
 }
 @media (prefers-reduced-motion:reduce){
   .film__media--pack img{transition:none}.film:hover .film__media--pack img{transform:none}
@@ -1357,4 +1361,31 @@ section[id], div[id="availability"], div[id="stocked"] { scroll-margin-top: 96px
   margin-top: var(--sp-3);
   font-size: 0.8125rem;
   color: var(--muted-2);
+}
+
+/* Glide InstaGel product block — the full range shot plus proof it is
+   physically stocked at the hub. */
+.packshot--wide { display: flex; align-items: center; justify-content: center; }
+.packshot--wide img { width: 100%; height: auto; display: block; }
+
+.range__proof {
+  margin-top: var(--sp-5);
+  padding-top: var(--sp-4);
+  border-top: 1px solid var(--line);
+  /* Supporting evidence, not the hero — the product shot should stay
+     the biggest thing in this block. */
+  max-width: 480px;
+}
+.range__proof img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+}
+.range__proof figcaption {
+  margin-top: var(--sp-3);
+  font-size: 0.8125rem;
+  line-height: 1.6;
+  color: var(--muted);
 }
