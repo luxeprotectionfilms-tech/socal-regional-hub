@@ -524,4 +524,42 @@
     });
   });
 
+  /* ══════════ 8 · PRODUCT VIDEO PLAYBACK ══════════
+     The Glide packshot is a short silent loop. Three rules:
+       · it never plays while off screen — no battery or data spent on a
+         clip nobody is looking at;
+       · a visitor who has asked their OS for reduced motion gets the
+         poster frame and nothing moving;
+       · if autoplay is blocked (some iOS low-power states), the poster
+         still shows, so the slot is never empty.                       */
+
+  var vids = all("video.packshot__vid");
+  if (vids.length) {
+    var stillPlease = window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    vids.forEach(function (v) {
+      v.muted = true;                 // belt and braces: autoplay needs this
+      if (stillPlease) {
+        v.removeAttribute("autoplay");
+        v.autoplay = false;
+        try { v.pause(); v.currentTime = 0; } catch (e) {}
+        v.setAttribute("controls", "");   // they can still choose to watch
+        return;
+      }
+      if ("IntersectionObserver" in window) {
+        new IntersectionObserver(function (entries) {
+          entries.forEach(function (en) {
+            if (en.isIntersecting) {
+              var p = v.play();
+              if (p && p.catch) p.catch(function () { /* autoplay blocked */ });
+            } else {
+              try { v.pause(); } catch (e) {}
+            }
+          });
+        }, { threshold: 0.2 }).observe(v);
+      }
+    });
+  }
+
 })();

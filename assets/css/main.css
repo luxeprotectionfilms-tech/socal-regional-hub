@@ -1124,7 +1124,8 @@ em {
   display:grid;grid-template-columns:minmax(260px,340px) 1fr;gap:1.6rem;align-items:start}
 .range__item--media .packshot{background:#fff;display:flex;
   align-items:center;justify-content:center;padding:1.2rem;align-self:stretch}
-.range__item--media .packshot img{width:100%;height:auto;max-height:340px;object-fit:contain;display:block}
+.range__item--media .packshot img,
+.range__item--media .packshot video{width:100%;height:auto;max-height:340px;object-fit:contain;display:block}
 .range__body{padding:1.6rem 1.6rem 1.6rem 0}
 .range__body .cway__t{border-bottom:0;padding-bottom:.2rem;margin-bottom:.5rem}
 
@@ -1137,7 +1138,8 @@ em {
   .colorway__pack img{max-height:170px}
   .range__item--media{grid-template-columns:1fr;gap:0}
   .range__item--media .packshot{padding:1.4rem}
-  .range__item--media .packshot img{max-height:260px}
+  .range__item--media .packshot img,
+  .range__item--media .packshot video{max-height:260px}
   .range__body{padding:1.3rem}
 }
 @media (prefers-reduced-motion:reduce){
@@ -1366,7 +1368,33 @@ section[id], div[id="availability"], div[id="stocked"] { scroll-margin-top: 96px
 /* Glide InstaGel product block — the full range shot plus proof it is
    physically stocked at the hub. */
 .packshot--wide { display: flex; align-items: center; justify-content: center; }
-.packshot--wide img { width: 100%; height: auto; display: block; }
+.packshot--wide img,
+.packshot--wide video { width: 100%; height: auto; display: block; }
+
+/* Video packshot.
+   The clip is a 3:2-ish landscape on a white sweep, so it cannot fill the
+   tall square slot the stills were sized for — stretching the white panel
+   the full height of the card just leaves a blank slab beside the copy.
+   The panel hugs the clip instead: white where the product is, card surface
+   below it. The media column is also widened, since a landscape clip needs
+   more width than an upright bottle did. */
+.range__item--vid,
+.range__item--media:has(.packshot--video){grid-template-columns:minmax(300px,440px) 1fr}
+.range__media{display:flex;flex-direction:column;align-self:start;
+  border-right:1px solid var(--line)}
+.range__item--media .packshot--video{padding:0;align-self:stretch;
+  border-bottom:1px solid var(--line)}
+
+.packshot--video video{max-height:none;border-radius:0;width:100%;height:auto}
+.range__item--media .packshot--video video{max-height:none}
+@media (max-width:640px){
+  /* Must restate the single-column rule: the widened video grid above is
+     unscoped and would otherwise win on cascade order and leave a 300px
+     column on a 390px phone. */
+  .range__item--vid,
+  .range__item--media:has(.packshot--video){grid-template-columns:1fr}
+  .range__media{border-right:0;border-bottom:1px solid var(--line)}
+}
 
 .range__proof {
   margin-top: var(--sp-5);
