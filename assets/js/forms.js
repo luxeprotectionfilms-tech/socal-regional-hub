@@ -139,7 +139,11 @@
 
     var attr = attribution();
 
-    data.lead_source  = CFG.leadSource || "Gravity Garage Regional Hub Website";
+    /* Zoho's Lead_Source is a picklist — an arbitrary string is silently
+       dropped, so send the exact allowed value and keep the descriptive
+       detail alongside it. */
+    data.Lead_Source  = CFG.leadSource || "Website Leads";
+    data.lead_source_detail = "Gravity Garage Regional Hub Website — Southern California";
     data.inquiry_type = data.purpose || INQUIRY_BY_FORM[formName] || "General enquiry";
     data.audience     = AUDIENCE_BY_FORM[formName] || "Unknown";
     data.hub          = "Southern California — Santa Clarita / Valencia";
@@ -150,6 +154,25 @@
       data.vehicle = [data.vehicle_year, data.vehicle_make, data.vehicle_model]
         .filter(Boolean).join(" ");
     }
+
+    /* ---- Zoho Leads field names ----
+       Mapped here rather than in the Zap, so the CRM side is a straight
+       field-for-field copy with no translation step to get wrong.
+       Last_Name is mandatory in Zoho; the form enforces it. */
+    data.First_Name = data.first_name || "";
+    data.Last_Name  = data.last_name  || data.first_name || "Website enquiry";
+    data.Email      = data.email || "";
+    data.Phone      = data.phone || "";
+    if (data.company_name) data.Company = data.company_name;
+    if (data.city)  data.City  = data.city;
+    if (data.state) data.State = data.state;
+    if (data.website_or_social) data.Website = data.website_or_social;
+
+    // Custom fields that already exist on the LUXE Leads layout.
+    if (data.business_type)   data.LV26_Business_Type      = data.business_type;
+    if (data.monthly_volume)  data.LV26_Monthly_PPF_Volume = data.monthly_volume;
+    if (data.role)            data.LV26_Role               = data.role;
+
     data.page_url     = window.location.href;
     data.referring_url = attr.referrer || document.referrer || "";
     data.landing_page = attr.landing_page || "";
@@ -164,11 +187,32 @@
     data.page = data.page_url;
     data.submitted = data.submitted_at;
 
+    // Everything a salesperson wants at a glance, in one readable block.
+    var desc = [];
+    desc.push("Source: Gravity Garage Regional Hub (Santa Clarita / Valencia)");
+    desc.push("Enquiry: " + data.inquiry_type);
+    if (data.vehicle)          desc.push("Vehicle: " + data.vehicle);
+    if (data.service)          desc.push("Service: " + data.service);
+    if (data.product_interest) desc.push("Product interest: " + data.product_interest);
+    if (data.color_interest)   desc.push("Color interest: " + data.color_interest);
+    if (data.film)             desc.push("Film line: " + data.film);
+    if (data.timeframe)        desc.push("Timeframe: " + data.timeframe);
+    if (data.current_brands)   desc.push("Currently runs: " + data.current_brands);
+    if (data.local_pickup_interest) desc.push("Local pickup: " + data.local_pickup_interest);
+    if (data.account_interest) desc.push("Account interest: " + data.account_interest);
+    if (data.message)          desc.push("", "Message: " + data.message);
+    if (data.notes)            desc.push("", "Notes: " + data.notes);
+    var utm = [data.utm_source, data.utm_medium, data.utm_campaign].filter(Boolean).join(" / ");
+    if (utm) desc.push("", "Campaign: " + utm);
+    desc.push("Page: " + data.page_url);
+    data.Description = desc.join("\n");
+
     // Formspree-specific hints: make the notification email readable and
     // let "Reply" go straight back to the enquirer. Harmless on other
     // endpoints, which simply ignore keys they don't recognise.
-    data._subject = "LUXE SoCal Hub — " + data.inquiry_type +
-                    (data.name ? " — " + data.name : "");
+    var who = [data.first_name, data.last_name].filter(Boolean).join(" ");
+    data.name = who;   // kept for the mailto fallback and legacy endpoints
+    data._subject = "LUXE SoCal Hub — " + data.inquiry_type + (who ? " — " + who : "");
     if (data.email) data._replyto = data.email;
 
     return data;

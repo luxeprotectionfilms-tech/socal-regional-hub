@@ -286,8 +286,8 @@
   */
 
   var TABS = {
-    retail: { btn: one("#tab-retail"), panel: one("#panel-retail"), firstField: "#r-name" },
-    trade:  { btn: one("#tab-trade"),  panel: one("#panel-trade"),  firstField: "#t-name" }
+    retail: { btn: one("#tab-retail"), panel: one("#panel-retail"), firstField: "#r-first" },
+    trade:  { btn: one("#tab-trade"),  panel: one("#panel-trade"),  firstField: "#t-first" }
   };
 
   function showTab(key, moveFocus) {
@@ -380,7 +380,7 @@
       if (contact) contact.scrollIntoView({ behavior: "smooth", block: "start" });
 
       window.setTimeout(function () {
-        var f = one("#r-name");
+        var f = one("#r-first");
         if (f) f.focus({ preventScroll: true });
       }, 620);
 

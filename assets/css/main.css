@@ -240,8 +240,23 @@ em {
   color: var(--muted-2);
 }
 
-.nav { display: flex; align-items: center; gap: var(--sp-6); }
-.nav__list { display: flex; align-items: center; gap: var(--sp-5); }
+.nav { display: flex; align-items: center; gap: var(--sp-5); }
+/* The bar must never wrap to a second row. nowrap makes that structural
+   rather than a matter of counting characters, and the gap tightens as the
+   viewport narrows so it stays on one line down to the mobile breakpoint. */
+.nav__list { display: flex; align-items: center; gap: var(--sp-5); flex-wrap: nowrap; white-space: nowrap; }
+.nav__list a { white-space: nowrap; }
+
+@media (max-width: 1300px) { .nav { gap: var(--sp-4); } .nav__list { gap: var(--sp-4); } }
+@media (max-width: 1150px) {
+  .nav__list { gap: 1.05rem; }
+  .nav__list a { font-size: 0.8125rem; }
+  .nav__cta { padding-inline: 1rem; }
+}
+@media (max-width: 1030px) {
+  .nav__list { gap: .8rem; }
+  .nav__list a { font-size: 0.78rem; }
+}
 .nav__list a {
   font-size: 0.875rem;
   font-weight: 500;

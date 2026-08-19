@@ -70,14 +70,11 @@
 
     <nav class="nav" id="nav" aria-label="Primary">
       <ul class="nav__list">
-        <li><a href="#hub">The Hub</a></li>
-        <li><a href="#inventory">Inventory</a></li>
-        <li><a href="#films">Collection</a></li>
         <li><a href="color-deck/">Color Deck</a></li>
+        <li><a href="#films">Collection</a></li>
+        <li><a href="#inventory">Availability</a></li>
         <li><a href="#installation">Installation</a></li>
         <li><a href="#showroom">Showroom</a></li>
-        <li><a href="#story">The Facility</a></li>
-        <li><a href="#about">About</a></li>
         <li><a href="#visit">Visit</a></li>
       </ul>
       <a class="btn btn--gold btn--sm nav__cta" href="#contact" data-cta="quote">Get a PPF Quote</a>
@@ -638,10 +635,18 @@
 
               <div class="field-row">
                 <div class="field">
-                  <label for="r-name">Full name</label>
-                  <input id="r-name" name="name" type="text" autocomplete="name" required>
-                  <p class="err" id="r-name-err" role="alert" data-err-for="r-name"></p>
+                  <label for="r-first">First name</label>
+                  <input id="r-first" name="first_name" type="text" autocomplete="given-name" required>
+                  <p class="err" id="r-first-err" role="alert" data-err-for="r-first"></p>
                 </div>
+                <div class="field">
+                  <label for="r-last">Last name</label>
+                  <input id="r-last" name="last_name" type="text" autocomplete="family-name" required>
+                  <p class="err" id="r-last-err" role="alert" data-err-for="r-last"></p>
+                </div>
+              </div>
+
+              <div class="field-row">
                 <div class="field">
                   <label for="r-phone">Phone</label>
                   <input id="r-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required>
@@ -742,10 +747,18 @@
 
               <div class="field-row">
                 <div class="field">
-                  <label for="t-name">Full name</label>
-                  <input id="t-name" name="name" type="text" autocomplete="name" required>
-                  <p class="err" id="t-name-err" role="alert" data-err-for="t-name"></p>
+                  <label for="t-first">First name</label>
+                  <input id="t-first" name="first_name" type="text" autocomplete="given-name" required>
+                  <p class="err" id="t-first-err" role="alert" data-err-for="t-first"></p>
                 </div>
+                <div class="field">
+                  <label for="t-last">Last name</label>
+                  <input id="t-last" name="last_name" type="text" autocomplete="family-name" required>
+                  <p class="err" id="t-last-err" role="alert" data-err-for="t-last"></p>
+                </div>
+              </div>
+
+              <div class="field-row">
                 <div class="field">
                   <label for="t-company">Company</label>
                   <input id="t-company" name="company_name" type="text" autocomplete="organization" required>
@@ -764,6 +777,22 @@
                   <input id="t-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required>
                   <p class="err" id="t-phone-err" role="alert" data-err-for="t-phone"></p>
                 </div>
+              </div>
+
+              <div class="field">
+                <label for="t-role">Your role</label>
+                <select id="t-role" name="role">
+                  <option value="">Select</option>
+                  <option>Owner / Founder</option>
+                  <option>Partner</option>
+                  <option>General Manager</option>
+                  <option>Sales Manager</option>
+                  <option>Installer</option>
+                  <option>Purchasing / Procurement</option>
+                  <option>Marketing</option>
+                  <option>Distributor Rep</option>
+                  <option>Other</option>
+                </select>
               </div>
 
               <div class="field">
@@ -788,14 +817,16 @@
                 <label for="t-type">Business type</label>
                 <select id="t-type" name="business_type" required>
                   <option value="">Select business type</option>
-                  <option>PPF installer</option>
-                  <option>Window tint shop</option>
-                  <option>Vehicle wrap shop</option>
-                  <option>Detailer</option>
-                  <option>Dealership</option>
-                  <option>Body shop</option>
-                  <option>Performance / restyling shop</option>
-                  <option>Other</option>
+                  <option>PPF Installer</option>
+                  <option>Tint Installer</option>
+                  <option>PPF + Tint Shop</option>
+                  <option>Detail Shop</option>
+                  <option>Dealer / Reseller</option>
+                  <option>Distributor</option>
+                  <option>Automotive Dealership</option>
+                  <option>Manufacturer / Supplier</option>
+                  <option>Media / Content Creator</option>
+                  <option>Other Automotive Industry</option>
                 </select>
                 <p class="err" id="t-type-err" role="alert" data-err-for="t-type"></p>
               </div>
@@ -843,12 +874,14 @@
 
               <div class="field">
                 <label for="t-volume">Estimated monthly PPF usage <span class="opt">(optional)</span></label>
-                <select id="t-volume" name="monthly_usage">
+                <select id="t-volume" name="monthly_volume">
                   <option value="">Prefer not to say</option>
-                  <option>Under 1 roll</option>
-                  <option>1–3 rolls</option>
-                  <option>4–10 rolls</option>
-                  <option>10+ rolls</option>
+                  <option>Less than 3 rolls</option>
+                  <option>3–5 rolls</option>
+                  <option>6–10 rolls</option>
+                  <option>11–20 rolls</option>
+                  <option>21–50 rolls</option>
+                  <option>50+ rolls</option>
                 </select>
               </div>
 
@@ -888,11 +921,14 @@
       <h2 class="footer__h">Explore</h2>
       <ul>
         <li><a href="#hub">The Hub</a></li>
-        <li><a href="#inventory">Inventory</a></li>
         <li><a href="#films">Films</a></li>
         <li><a href="color-deck/">Color Deck</a></li>
+        <li><a href="#inventory">Local Availability</a></li>
         <li><a href="#installation">Installation</a></li>
+        <li><a href="#showroom">Showroom</a></li>
+        <li><a href="#story">The Facility</a></li>
         <li><a href="#about">About</a></li>
+        <li><a href="#visit">Visit</a></li>
       </ul>
     </nav>
 

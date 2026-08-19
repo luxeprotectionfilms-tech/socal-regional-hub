@@ -98,8 +98,10 @@ window.SITE_CONFIG = {
   // Controls whether the success message promises a confirmation email.
   autoResponse: false,
 
-  // Stamped onto every submission so the CRM can attribute the lead.
-  leadSource: "Gravity Garage Regional Hub Website",
+  // Zoho CRM's Lead_Source is a PICKLIST. This must be one of its allowed
+  // values or Zoho silently drops it. "Website Leads" is the existing option.
+  // The descriptive detail rides along in lead_source_detail and Description.
+  leadSource: "Website Leads",
 
   // Used only for the mailto fallback when formEndpoint is blank.
   fallbackEmail: "corporate@luxeprotectionfilms.com",
