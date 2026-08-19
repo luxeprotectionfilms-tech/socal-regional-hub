@@ -10,6 +10,12 @@
   var CFG = window.SITE_CONFIG || {};
   var doc = document;
 
+  // Defined properly in section 6; declared here because the CTA/tab wiring
+  // above runs first and calls it.
+  function track(name, params) {
+    if (typeof window.gtag === "function") window.gtag("event", name, params || {});
+  }
+
   /* ---------- helpers ---------- */
   function all(sel, root) { return Array.prototype.slice.call((root || doc).querySelectorAll(sel)); }
   function one(sel, root) { return (root || doc).querySelector(sel); }
@@ -271,40 +277,202 @@
   }
 
 
-  /* ══════════ 5 · CTA → FORM PURPOSE PRE-SELECTION ══════════ */
+  /* ══════════ 5 · CTA ROUTING + CONTACT TABS ══════════ */
   /*
-     Any link carrying data-purpose pre-selects the matching option
-     in the main contact form, so the visitor lands on a form that
-     already reflects what they clicked.
+     Two distinct lead paths. A CTA carrying data-cta="quote" opens the
+     vehicle-owner form; data-cta="trade" opens the installer/dealer form;
+     data-cta="stock" goes to the availability form in the inventory section.
+     Nothing routes to a single generic contact form.
   */
 
-  var PURPOSE_MAP = {
-    showroom: "Request a showroom visit",
-    quote:    "Request an installation quote",
-    stock:    "Check local film availability",
-    dealer:   "Dealer or installer support"
+  var TABS = {
+    retail: { btn: one("#tab-retail"), panel: one("#panel-retail"), firstField: "#r-name" },
+    trade:  { btn: one("#tab-trade"),  panel: one("#panel-trade"),  firstField: "#t-name" }
   };
 
-  var purposeSelect = one("#c-purpose");
+  function showTab(key, moveFocus) {
+    if (!TABS[key] || !TABS[key].btn) return;
 
-  all("[data-purpose]").forEach(function (link) {
-    link.addEventListener("click", function () {
-      if (!purposeSelect) return;
-      var value = PURPOSE_MAP[link.getAttribute("data-purpose")];
-      if (!value) return;
+    Object.keys(TABS).forEach(function (k) {
+      var t = TABS[k];
+      if (!t.btn || !t.panel) return;
+      var active = (k === key);
+      t.btn.classList.toggle("is-active", active);
+      t.btn.setAttribute("aria-selected", String(active));
+      t.btn.setAttribute("tabindex", active ? "0" : "-1");
+      t.panel.classList.toggle("is-hidden", !active);
+      if (active) t.panel.removeAttribute("hidden");
+      else t.panel.setAttribute("hidden", "");
+    });
 
-      purposeSelect.value = value;
-      purposeSelect.dispatchEvent(new Event("change", { bubbles: true }));
-
-      // Move focus to the first real input after the jump completes.
+    if (moveFocus) {
       window.setTimeout(function () {
-        var firstInput = one("#c-name");
-        if (firstInput) firstInput.focus({ preventScroll: true });
-      }, 520);
+        var f = one(TABS[key].firstField);
+        if (f) f.focus({ preventScroll: true });
+      }, 480);
+    }
+  }
 
-      track("cta_click", { purpose: link.getAttribute("data-purpose") });
+  Object.keys(TABS).forEach(function (k) {
+    var t = TABS[k];
+    if (!t.btn) return;
+    t.btn.addEventListener("click", function () {
+      showTab(k, false);
+      track("contact_tab", { tab: k });
+    });
+    // Arrow-key navigation between tabs, per the ARIA tabs pattern.
+    t.btn.addEventListener("keydown", function (e) {
+      if (e.key !== "ArrowRight" && e.key !== "ArrowLeft") return;
+      e.preventDefault();
+      var other = (k === "retail") ? "trade" : "retail";
+      showTab(other, false);
+      if (TABS[other].btn) TABS[other].btn.focus();
     });
   });
+
+  all("[data-cta]").forEach(function (link) {
+    link.addEventListener("click", function (e) {
+      var kind = link.getAttribute("data-cta");
+      track("cta_click", { cta: kind });
+
+      if (kind !== "quote" && kind !== "trade") return;   // #availability handles itself
+
+      showTab(kind === "trade" ? "trade" : "retail", true);
+
+      // Scroll to the tab bar rather than the top of #contact. Anchoring at
+      // the section start leaves the two choices below the fold on a laptop,
+      // which is the one thing the visitor needs to see.
+      var tabs = one(".tabs__bar");
+      if (tabs) {
+        e.preventDefault();
+        tabs.scrollIntoView({ behavior: "smooth", block: "center" });
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, "", kind === "trade" ? "#trade" : "#quote");
+        }
+      }
+    });
+  });
+
+  /* ── COLOR DECK ──
+     Clicking a finish carries it into the hub's own quote form instead of
+     sending the visitor out to the LUXE catalogue. The whole point of the
+     regional page is that the enquiry lands here, not back upstream. */
+
+  all("[data-color]").forEach(function (chip) {
+    chip.addEventListener("click", function () {
+      var color = chip.getAttribute("data-color") || "";
+
+      showTab("retail", false);
+
+      var colorField = one("#r-color");
+      if (colorField) {
+        colorField.value = color;
+        colorField.dispatchEvent(new Event("input", { bubbles: true }));
+      }
+      // Colour change implies Color Series — preselect it, but never
+      // overwrite a choice the visitor already made.
+      var product = one("#r-product");
+      if (product && !product.value) product.value = "Color Series";
+      var service = one("#r-service");
+      if (service && !service.value) service.value = "Color change PPF";
+
+      var contact = one("#contact");
+      if (contact) contact.scrollIntoView({ behavior: "smooth", block: "start" });
+
+      window.setTimeout(function () {
+        var f = one("#r-name");
+        if (f) f.focus({ preventScroll: true });
+      }, 620);
+
+      track("color_deck_select", { color: color });
+    });
+  });
+
+  // Outbound clicks to the LUXE catalogue are tracked separately so the
+  // leak back upstream stays measurable.
+  all(".film__link--out").forEach(function (el) {
+    el.addEventListener("click", function () {
+      track("outbound_luxe_catalogue", { url: el.getAttribute("href") || "" });
+    });
+  });
+
+
+  // Deep links: /#trade or /#quote open the matching form directly, so
+  // outreach emails and Instagram links can point at the right lane.
+  // ?color=… arrives from the colour deck and pre-fills the finish, so a
+  // visitor who picked a colour never has to retype it.
+  (function () {
+    var h = (window.location.hash || "").toLowerCase();
+    var color = null;
+    try { color = new URLSearchParams(window.location.search).get("color"); } catch (e) {}
+
+    if (h === "#trade" || h === "#dealers" || h === "#installers") showTab("trade", false);
+    else if (h === "#quote") showTab("retail", false);
+
+    if (!color) return;
+    color = color.slice(0, 120);
+
+    var rc = one("#r-color");
+    if (rc && !rc.value) rc.value = color;
+
+    var rp = one("#r-product");
+    if (rp && !rp.value) rp.value = "Color Series";
+    var rs = one("#r-service");
+    if (rs && !rs.value) rs.value = "Color change PPF";
+
+    // Availability form: drop it into the notes so the hub knows what to check.
+    var an = one("#av-notes");
+    if (an && !an.value) an.value = "Interested in: " + color;
+    var af = one("#av-film");
+    if (af && !af.value) af.value = "Color Series — Gloss";
+
+    // Trade form: same, into notes.
+    var tn = one("#t-notes");
+    if (tn && !tn.value) tn.value = "Interested in: " + color;
+    var tp = one("#t-product");
+    if (tp && !tp.value) tp.value = "Color Series";
+
+    track("deck_color_carried", { color: color });
+  })();
+
+
+  /* ══════════ 5b · LOCALLY STOCKED COLOURS ══════════ */
+  /*
+     Driven entirely from site-config.js so the LUXE team can change what is
+     featured without touching markup. Empty array => the block stays hidden,
+     so the page never advertises stock that has not been confirmed.
+  */
+
+  (function renderStockedColors() {
+    var list = CFG.stockedColors;
+    var wrap = one("#stockedColors");
+    var grid = one("#stockedColorGrid");
+    if (!wrap || !grid) return;
+    if (!Array.isArray(list) || !list.length) return;   // stays hidden
+
+    list.forEach(function (c) {
+      if (!c || !c.name) return;
+      var el = doc.createElement("div");
+      el.className = "swatch";
+      var chip = doc.createElement("span");
+      chip.className = "swatch__chip";
+      if (c.hex) chip.style.background = c.hex;
+      var name = doc.createElement("span");
+      name.className = "swatch__name";
+      name.appendChild(doc.createTextNode(c.name));
+      if (c.line) {
+        var sub = doc.createElement("span");
+        sub.className = "swatch__line";
+        sub.textContent = c.line;
+        name.appendChild(sub);
+      }
+      el.appendChild(chip); el.appendChild(name);
+      grid.appendChild(el);
+    });
+
+    wrap.removeAttribute("hidden");
+    wrap.classList.remove("is-hidden");
+  })();
 
 
   /* ══════════ 6 · ANALYTICS (LUXE-OWNED, OPTIONAL) ══════════ */
@@ -325,10 +493,6 @@
     window.gtag = function () { window.dataLayer.push(arguments); };
     window.gtag("js", new Date());
     window.gtag("config", CFG.analyticsId, { anonymize_ip: true });
-  }
-
-  function track(name, params) {
-    if (typeof window.gtag === "function") window.gtag("event", name, params || {});
   }
 
   window.SITE_TRACK = track; // used by forms.js

@@ -62,6 +62,23 @@ window.SITE_CONFIG = {
   postalCode: "91355",
 
 
+  /* ---------- 2b · LOCALLY STOCKED COLORS ----------------- */
+  /*
+     Featured on the page under "Colors on hand right now".
+     LEFT EMPTY DELIBERATELY — the page must not advertise stock that
+     has not been confirmed against the inventory manifest.
+
+     Add entries once LUXE confirms what is physically held, e.g.
+       { name: "Nardo Circuit Gray", line: "Color Series · Gloss", hex: "#9a9c9b" },
+       { name: "Satin Cherry",       line: "Color Series · Satin", hex: "#7d1220" },
+
+     `hex` is an approximate UI swatch for the little colour dot only.
+     It is not a colour-accurate representation of the film.
+     Empty array => the whole block stays hidden.
+  */
+  stockedColors: [],
+
+
   /* ---------- 3 · FORM DELIVERY --------------------------- */
   /*
      Where form submissions are sent. Any endpoint accepting a POST

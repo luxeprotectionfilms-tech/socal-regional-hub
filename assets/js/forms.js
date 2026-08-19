@@ -141,6 +141,15 @@
 
     data.lead_source  = CFG.leadSource || "Gravity Garage Regional Hub Website";
     data.inquiry_type = data.purpose || INQUIRY_BY_FORM[formName] || "General enquiry";
+    data.audience     = AUDIENCE_BY_FORM[formName] || "Unknown";
+    data.hub          = "Southern California — Santa Clarita / Valencia";
+
+    // Assemble a readable vehicle string for the CRM without losing the
+    // individual fields, which are more useful for filtering.
+    if (data.vehicle_year || data.vehicle_make || data.vehicle_model) {
+      data.vehicle = [data.vehicle_year, data.vehicle_make, data.vehicle_model]
+        .filter(Boolean).join(" ");
+    }
     data.page_url     = window.location.href;
     data.referring_url = attr.referrer || document.referrer || "";
     data.landing_page = attr.landing_page || "";
@@ -167,7 +176,17 @@
 
   var INQUIRY_BY_FORM = {
     availability: "Local film availability",
-    contact: "General enquiry"
+    retail:       "Vehicle owner — PPF quote / installation",
+    trade:        "Installer / dealer — local supply"
+  };
+
+  /* Which side of the business a lead belongs to. Routed on at the CRM,
+     so retail installation goes to the Gravity operational contact and
+     trade enquiries reach LUXE. */
+  var AUDIENCE_BY_FORM = {
+    availability: "Trade or retail — availability",
+    retail:       "Retail",
+    trade:        "Trade"
   };
 
   /* Some endpoints (Zoho Forms / Zoho CRM webforms, and most classic
@@ -294,9 +313,16 @@
           track("form_submit", {
             form: formName,
             method: "endpoint",
+            audience: data.audience,
             inquiry_type: data.inquiry_type,
             purpose: data.purpose || ""
           });
+          // Distinct event names make these easy to mark as separate
+          // conversions in GA4 without custom-dimension work.
+          track(formName === "trade" ? "lead_installer_dealer"
+              : formName === "retail" ? "lead_ppf_quote"
+              : "lead_film_availability",
+              { audience: data.audience });
         })
         .catch(function () {
           status(form, "That didn't send. Please try again in a moment, or call the hub and we'll take care of it.", "error");
@@ -309,6 +335,7 @@
   }
 
   wire(document.getElementById("availabilityForm"), "availability");
-  wire(document.getElementById("mainForm"), "contact");
+  wire(document.getElementById("retailForm"), "retail");
+  wire(document.getElementById("tradeForm"), "trade");
 
 })();
