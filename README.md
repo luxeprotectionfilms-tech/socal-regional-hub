@@ -289,7 +289,13 @@ Done in this pass:
 - [x] Business address — confirmed as **Valencia, CA 91355** against the public
       business listing (Valencia is the listed locality; Santa Clarita is the
       parent city, and the listing uses Valencia).
-- [x] Phone — (818) 826-9695, confirmed against the listing.
+- [x] Phone — **(661) 241-8001**, set by LUXE on 20 August 2026, replacing
+      (818) 826-9695 sitewide (visible copy, every `tel:` link, and the
+      JSON-LD `telephone` field).
+      **Google Business Profile must be updated to match.** The (818) number
+      is what the public listing carried when this build was written; while
+      the two disagree, Google sees a conflict between the listing and the
+      page and can distrust both. Same rule as the address and hours.
 - [x] Business hours — Mon–Fri 9:00am–5:00pm, Sat & Sun closed, taken from the
       published listing and mirrored into JSON-LD `openingHoursSpecification`.
 - [x] Fallback email — set to `info@luxeprotectionfilms.com`.

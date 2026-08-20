@@ -10,7 +10,7 @@
 
 /* CONFIRMED BY RAVI — 5 August 2026
    ────────────────────────────────────────────────────────────
-   Phone ......... (818) 826-9695
+   Phone ......... (661) 241-8001
    Instagram ..... @gravitygarage_
    Business name . Gravity Garage
    Hours ......... Mon–Fri 9:00am–5:00pm, weekends closed
@@ -32,8 +32,8 @@ window.SITE_CONFIG = {
 
   // Confirmed. Blank both to hide every phone affordance
   // (footer, Visit block, mobile Call button).
-  phone: "(818) 826-9695",
-  phoneE164: "+18188269695",
+  phone: "(661) 241-8001",
+  phoneE164: "+16612418001",
 
   // Displayed exactly as typed. Use \n for line breaks.
   hours: "Mon–Fri 9:00am – 5:00pm\nSaturday & Sunday closed",

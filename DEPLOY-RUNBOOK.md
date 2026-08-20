@@ -117,7 +117,7 @@ Walk this list on a real phone, not just a desktop browser:
 - [ ] `https://gravitygarage.luxeprotectionfilms.com` loads over HTTPS with no
       certificate warning
 - [ ] The hero photograph loads, and the page is legible on a phone
-- [ ] Tap **Call** in the bottom bar — it dials (818) 826-9695
+- [ ] Tap **Call** in the bottom bar — it dials (661) 241-8001
 - [ ] Tap **Directions** — it opens Maps at 27820 Fremont Ct, Ste 1, Valencia
 - [ ] Address and hours in the *Visit the Hub* block are correct, with no
       placeholder text anywhere on the page
