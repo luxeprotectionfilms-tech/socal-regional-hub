@@ -1,14 +1,31 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
   <url>
     <loc>https://gravitygarage.luxeprotectionfilms.com/</loc>
-    <lastmod>2026-08-19</lastmod>
+    <lastmod>2026-08-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
+    <image:image>
+      <image:loc>https://gravitygarage.luxeprotectionfilms.com/assets/images/gravity-luxe-installation-bay.jpg</image:loc>
+      <image:title>LUXE PPF installation bay, Santa Clarita / Valencia</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://gravitygarage.luxeprotectionfilms.com/assets/images/luxe-color-series-packaging.jpg</image:loc>
+      <image:title>LUXE Color Series paint protection film cartons at the Southern California hub</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://gravitygarage.luxeprotectionfilms.com/assets/images/luxe-glide-instagel-hub.jpg</image:loc>
+      <image:title>LUXE Glide InstaGel stocked at the Southern California hub</image:title>
+    </image:image>
+    <image:image>
+      <image:loc>https://gravitygarage.luxeprotectionfilms.com/assets/images/gravity-showroom-reception.jpg</image:loc>
+      <image:title>Gravity Garage showroom and LUXE product display, Valencia CA</image:title>
+    </image:image>
   </url>
   <url>
     <loc>https://gravitygarage.luxeprotectionfilms.com/color-deck/</loc>
-    <lastmod>2026-08-19</lastmod>
+    <lastmod>2026-08-20</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>

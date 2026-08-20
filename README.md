@@ -211,6 +211,36 @@ keeping the filenames. If you'd rather use new filenames, update all four
 Recommended widths when generating replacements: **1800px** desktop,
 **1100px** mobile, quality ~82.
 
+**Rotate before you resize.** Phone cameras usually record orientation as an
+EXIF flag rather than rotating the pixels. Any resize that reads pixels only
+throws that flag away and ships the photo sideways — which has happened here
+once already. Apply EXIF orientation first, then crop, then resize.
+
+### Two generated blocks — re-run the scripts, don't hand-edit
+
+Two parts of the markup are generated, and both are fenced by
+`<!-- GENERATED:… -->` comments. Editing between those markers by hand works
+until the next build overwrites it.
+
+```
+python3 tools/build-deck.py    # after editing assets/js/color-deck-data.js
+python3 tools/build-faq.py     # after editing any FAQ question or answer
+```
+
+**`tools/build-deck.py`** writes the 175 colour tiles into
+`color-deck/index.html`. They are in the HTML rather than built purely in
+JavaScript because the finish names and TPU codes are the only reason that
+page is worth crawling, and a crawler that does not run scripts would
+otherwise read 296 words and not one colour name. `deck.js` adopts those
+existing tiles on load rather than rebuilding them, so there is one set of
+tiles in the DOM and no flash. If the data file and the markup ever fall out
+of step, `deck.js` notices and rebuilds from scratch — degraded, but never
+broken.
+
+**`tools/build-faq.py`** derives the FAQPage JSON-LD from the FAQ section's
+own markup, so the structured data cannot drift away from what visitors
+actually read. Edit the copy in `index.html`, re-run the script.
+
 ---
 
 ## 7 · Content and compliance guardrails

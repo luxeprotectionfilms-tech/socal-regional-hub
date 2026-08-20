@@ -274,6 +274,35 @@
         if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add("is-in");
       });
     });
+
+    /* Fail visible.
+       Almost everything on this page starts below the fold at opacity 0 and
+       only becomes visible when it scrolls into view. That is fine for a
+       person. It is a real risk for a rendering crawler, which executes the
+       JavaScript — so .no-js no longer applies — but does not scroll, and
+       may therefore render most of the page's content still transparent.
+       Search engines are entitled to discount content hidden by CSS, and
+       that would be most of what this page is for.
+
+       So: if nothing has scrolled after a few seconds, assume nobody is
+       scrolling and reveal everything. A human who has genuinely sat still
+       that long loses an animation they were not watching; a crawler gets
+       the whole page. */
+
+    var scrolled = false;
+    var onScroll = function () {
+      scrolled = true;
+      window.removeEventListener("scroll", onScroll);
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    window.setTimeout(function () {
+      if (scrolled) return;
+      reveals.forEach(function (el) {
+        el.classList.add("is-in");
+        io.unobserve(el);
+      });
+    }, 4000);
   }
 
 

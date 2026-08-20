@@ -117,6 +117,45 @@
     grid.appendChild(frag);
   }
 
+  /* ---------- hydrate ----------
+     The 175 tiles are already in the HTML, written there by
+     tools/build-deck.py, because the finish names and TPU codes are the
+     only reason this page is worth crawling and they cannot live solely
+     in JavaScript. So on first load we adopt those nodes — paint the
+     swatches, wire the clicks — instead of throwing them away and
+     building the same thing again. One set of tiles, no flash, and the
+     markup a crawler reads is the markup a visitor gets.
+
+     If the static tiles are missing or out of step with the data (someone
+     edited the data file and forgot to re-run the build script), this
+     returns false and the normal render() path takes over. */
+
+  function hydrate() {
+    var nodes = grid.querySelectorAll(".dtile[data-code]");
+    if (!nodes.length || nodes.length !== DATA.cards.length) return false;
+
+    var byCode = {};
+    DATA.cards.forEach(function (c) { byCode[c[1]] = c; });
+
+    for (var i = 0; i < nodes.length; i++) {
+      var node = nodes[i];
+      var card = byCode[node.getAttribute("data-code")];
+      if (!card) return false;                 // data drifted — rebuild instead
+      var sw = node.querySelector(".dtile__sw");
+      if (!sw) return false;
+      paint(sw, card);
+      (function (n, c) {
+        n.addEventListener("click", function () { openModal(c, n); });
+      })(node, card);
+    }
+
+    count.textContent = DATA.cards.length + " of " + DATA.cards.length + " finishes";
+    empty.hidden = true;
+    chipRow(secRow, DATA.sections, sec, function (v) { sec = v; track("deck_filter", { type: "finish", value: v }); });
+    chipRow(hueRow, DATA.hues, hue, function (v) { hue = v; track("deck_filter", { type: "hue", value: v }); });
+    return true;
+  }
+
   /* ---------- detail modal ---------- */
   function openModal(c, source) {
     lastFocused = source || doc.activeElement;
@@ -197,7 +236,7 @@
       d.cards.forEach(function (c) { seen[c[3]] = 1; });
       DATA.hues = ["All hues"].concat(Object.keys(seen).sort());
       probeSheets();
-      render();
+      if (!hydrate()) render();
 
       // Deep link: /color-deck/?code=TPU-5008 opens that finish directly,
       // so outreach can point at one specific colour.

@@ -1417,3 +1417,82 @@ section[id], div[id="availability"], div[id="stocked"] { scroll-margin-top: 96px
   line-height: 1.6;
   color: var(--muted);
 }
+
+/* ══════════ FAQ ══════════
+   <details>/<summary> rather than a JS accordion: it opens without
+   scripting, it is keyboard-operable and announced correctly for free,
+   and — the part that matters here — the answers are real text in the
+   markup whether or not anything expands them, so a crawler reads all
+   eight regardless of state. */
+.faq__list {
+  display: grid;
+  gap: 0;
+  max-width: 860px;
+  margin-inline: auto;
+  border-top: 1px solid var(--line);
+}
+.faq__item {
+  border-bottom: 1px solid var(--line);
+}
+.faq__item summary {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-4);
+  padding: 1.35rem 0;
+  cursor: pointer;
+  list-style: none;
+  transition: color .2s;
+}
+.faq__item summary::-webkit-details-marker { display: none; }
+.faq__item summary::after {
+  content: "";
+  flex: 0 0 auto;
+  width: 11px;
+  height: 11px;
+  margin-top: .45rem;
+  margin-left: auto;
+  border-right: 2px solid var(--gold);
+  border-bottom: 2px solid var(--gold);
+  transform: rotate(45deg);
+  transform-origin: center;
+  transition: transform .25s ease;
+}
+.faq__item[open] summary::after { transform: rotate(-135deg); }
+.faq__item summary:hover .faq__q { color: var(--gold); }
+.faq__item summary:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+.faq__q {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 1.02rem;
+  font-weight: 600;
+  line-height: 1.45;
+  letter-spacing: .005em;
+  color: var(--fg);
+  transition: color .2s;
+}
+.faq__a {
+  padding: 0 2.2rem 1.5rem 0;
+}
+.faq__a p {
+  margin: 0;
+  color: var(--muted);
+  font-size: .94rem;
+  line-height: 1.75;
+}
+.faq__a a { color: var(--gold); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color .2s; }
+.faq__a a:hover { border-bottom-color: var(--gold); }
+
+@media (max-width: 640px) {
+  .faq__item summary { padding: 1.15rem 0; gap: var(--sp-3); }
+  .faq__q { font-size: .95rem; }
+  .faq__a { padding-right: 0; padding-bottom: 1.25rem; }
+}
+
+/* The reveal animation hides content until it scrolls into view. On a
+   <details> that would mean an answer opened by the browser (a fragment
+   link, or find-in-page) could be sitting there invisible, so the FAQ
+   items opt out once open. */
+.faq__item[open].reveal { opacity: 1; transform: none; }
