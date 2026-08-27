@@ -264,21 +264,37 @@
 
       <div class="card form-card reveal" id="availability">
         <h3 class="h3">Buy LUXE Film Locally</h3>
+        <!-- Field names are the shared LUXE handler's allowlist, not free choice.
+             Anything not on that list is discarded server-side, and the four
+             below are required or the submission is rejected outright. -->
         <form class="form form--compact" id="availabilityForm" novalidate>
-          <input type="hidden" name="purpose" value="Film availability check">
-          <div class="field">
-            <label for="av-name">Name</label>
-            <input id="av-name" name="name" type="text" autocomplete="name" required>
-            <p class="err" id="av-name-err" role="alert" data-err-for="av-name"></p>
+          <div class="grid-2">
+            <div class="field">
+              <label for="av-first">First name</label>
+              <input id="av-first" name="first_name" type="text" autocomplete="given-name" required>
+              <p class="err" id="av-first-err" role="alert" data-err-for="av-first"></p>
+            </div>
+            <div class="field">
+              <label for="av-last">Last name</label>
+              <input id="av-last" name="last_name" type="text" autocomplete="family-name" required>
+              <p class="err" id="av-last-err" role="alert" data-err-for="av-last"></p>
+            </div>
           </div>
-          <div class="field">
-            <label for="av-email">Email</label>
-            <input id="av-email" name="email" type="email" autocomplete="email" required>
-            <p class="err" id="av-email-err" role="alert" data-err-for="av-email"></p>
+          <div class="grid-2">
+            <div class="field">
+              <label for="av-phone">Phone</label>
+              <input id="av-phone" name="phone" type="tel" autocomplete="tel" required>
+              <p class="err" id="av-phone-err" role="alert" data-err-for="av-phone"></p>
+            </div>
+            <div class="field">
+              <label for="av-email">Email</label>
+              <input id="av-email" name="email" type="email" autocomplete="email" required>
+              <p class="err" id="av-email-err" role="alert" data-err-for="av-email"></p>
+            </div>
           </div>
           <div class="field">
             <label for="av-film">Film line</label>
-            <select id="av-film" name="film" required>
+            <select id="av-film" name="film_interest" required>
               <option value="">Select a film line</option>
               <option>Gloss Is Boss</option>
               <option>Stealth Matte</option>
@@ -295,11 +311,17 @@
           </div>
           <div class="field">
             <label for="av-notes">Width, quantity range, or timing <span class="opt">(optional)</span></label>
-            <textarea id="av-notes" name="notes" rows="2"></textarea>
+            <textarea id="av-notes" name="comments" rows="2"></textarea>
           </div>
           <div class="hp" aria-hidden="true"><label for="av-company">Company</label><input id="av-company" name="company" type="text" tabindex="-1" autocomplete="off"></div>
           <button class="btn btn--gold btn--full" type="submit">Check Availability</button>
-          <p class="form__status" role="status" aria-live="polite"></p>
+          <div class="formstatus" id="avStatus" role="status" aria-live="polite">
+            <span class="formstatus__ico" aria-hidden="true"></span>
+            <span class="formstatus__body">
+              <strong class="formstatus__t"></strong>
+              <span class="formstatus__m"></span>
+            </span>
+          </div>
           <p class="form__fine">By submitting this form you agree that LUXE Protection Films and Gravity Garage may contact you about your request. Your information is handled in accordance with the <a data-site="privacy" href="https://luxeprotectionfilms.com/privacy-policy/" target="_blank" rel="noopener">LUXE Privacy Policy</a>.</p>
         </form>
       </div>
@@ -829,8 +851,7 @@
             <h3 class="h3">Get a PPF quote</h3>
             <p class="form__intro">Tell us about the vehicle and what you want protected. The hub will come back with a quote and available dates.</p>
             <form class="form" id="retailForm" novalidate>
-              <input type="hidden" name="purpose" value="Vehicle owner — PPF quote / installation">
-
+              
               <div class="field-row">
                 <div class="field">
                   <label for="r-first">First name</label>
@@ -896,7 +917,7 @@
               <div class="field-row">
                 <div class="field">
                   <label for="r-product">Film interest</label>
-                  <select id="r-product" name="product_interest">
+                  <select id="r-product" name="film_interest">
                     <option value="">No preference</option>
                     <option>Gloss Is Boss — clear</option>
                     <option>Stealth Matte</option>
@@ -924,12 +945,18 @@
 
               <div class="field">
                 <label for="r-message">Comments <span class="opt">(optional)</span></label>
-                <textarea id="r-message" name="message" rows="3" placeholder="Anything else that helps us quote accurately."></textarea>
+                <textarea id="r-message" name="comments" rows="3" placeholder="Anything else that helps us quote accurately."></textarea>
               </div>
 
               <div class="hp" aria-hidden="true"><label for="r-company">Company</label><input id="r-company" name="company" type="text" tabindex="-1" autocomplete="off"></div>
               <button class="btn btn--gold btn--full" type="submit">Get My PPF Quote</button>
-              <p class="form__status" role="status" aria-live="polite"></p>
+              <div class="formstatus" id="retailStatus" role="status" aria-live="polite">
+            <span class="formstatus__ico" aria-hidden="true"></span>
+            <span class="formstatus__body">
+              <strong class="formstatus__t"></strong>
+              <span class="formstatus__m"></span>
+            </span>
+          </div>
               <p class="form__fine">By submitting this form you agree that LUXE Protection Films and Gravity Garage may contact you about your request. Your information is handled in accordance with the <a data-site="privacy" href="https://luxeprotectionfilms.com/privacy-policy/" target="_blank" rel="noopener">LUXE Privacy Policy</a>.</p>
             </form>
           </div>
@@ -941,7 +968,6 @@
             <h3 class="h3">Installers &amp; dealers — contact the SoCal hub</h3>
             <p class="form__intro">Buying LUXE film locally, or interested in becoming an approved installer or dealer? Tell us about the shop and we'll route it to the right team.</p>
             <form class="form" id="tradeForm" novalidate>
-              <input type="hidden" name="purpose" value="Installer / dealer — local supply">
 
               <div class="field-row">
                 <div class="field">
@@ -1036,7 +1062,7 @@
 
               <div class="field">
                 <label for="t-product">LUXE product interest</label>
-                <select id="t-product" name="product_interest">
+                <select id="t-product" name="film_interest">
                   <option value="">No preference yet</option>
                   <option>Color Series</option>
                   <option>Gloss Is Boss — clear</option>
@@ -1060,7 +1086,7 @@
                 </div>
                 <div class="field">
                   <label for="t-account">Account interest</label>
-                  <select id="t-account" name="account_interest">
+                  <select id="t-account" name="interest">
                     <option value="">Select</option>
                     <option>Buy film as needed</option>
                     <option>Become an approved installer</option>
@@ -1072,7 +1098,7 @@
 
               <div class="field">
                 <label for="t-volume">Estimated monthly PPF usage <span class="opt">(optional)</span></label>
-                <select id="t-volume" name="monthly_volume">
+                <select id="t-volume" name="volume">
                   <option value="">Prefer not to say</option>
                   <option>Less than 3 rolls</option>
                   <option>3–5 rolls</option>
@@ -1085,12 +1111,18 @@
 
               <div class="field">
                 <label for="t-notes">Notes <span class="opt">(optional)</span></label>
-                <textarea id="t-notes" name="notes" rows="3"></textarea>
+                <textarea id="t-notes" name="comments" rows="3"></textarea>
               </div>
 
               <div class="hp" aria-hidden="true"><label for="t-hp">Fax</label><input id="t-hp" name="company" type="text" tabindex="-1" autocomplete="off"></div>
               <button class="btn btn--gold btn--full" type="submit">Contact the SoCal Hub</button>
-              <p class="form__status" role="status" aria-live="polite"></p>
+              <div class="formstatus" id="tradeStatus" role="status" aria-live="polite">
+            <span class="formstatus__ico" aria-hidden="true"></span>
+            <span class="formstatus__body">
+              <strong class="formstatus__t"></strong>
+              <span class="formstatus__m"></span>
+            </span>
+          </div>
               <p class="form__fine">By submitting this form you agree that LUXE Protection Films and Gravity Garage may contact you about your enquiry. Your information is handled in accordance with the <a data-site="privacy" href="https://luxeprotectionfilms.com/privacy-policy/" target="_blank" rel="noopener">LUXE Privacy Policy</a>.</p>
             </form>
           </div>

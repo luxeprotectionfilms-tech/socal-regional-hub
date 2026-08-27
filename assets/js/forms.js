@@ -1,85 +1,87 @@
 /* ============================================================
-   forms.js
-   Accessible validation + submission for both site forms.
-   Falls back to a pre-filled email if no endpoint is configured.
+   forms.js — Gravity Garage Regional Hub
+   ------------------------------------------------------------
+   Client side of the shared LUXE form handler.
+
+   THE RULE THIS FILE EXISTS TO OBEY
+   ---------------------------------
+   The browser never knows, sends, or influences where a lead goes.
+   There is no recipient address in this file, in index.html, or in
+   site-config.js — not as a config key, not as a payload field, not in
+   a data attribute. The handler resolves the destination from the
+   request's Origin header, which a page cannot forge, so a visitor
+   cannot open devtools and redirect a submission.
+
+   If you are ever tempted to add `to`, `_routeTo`, `_copyTo`, or a lead
+   email "just for the subject line" — don't. The handler discards
+   unknown keys anyway, so it would achieve nothing except putting an
+   address somewhere a stranger can read it.
    ============================================================ */
 
 (function () {
   "use strict";
 
-  var CFG = window.SITE_CONFIG || {};
+  /* The entire client-side contract. Three keys. Nothing else belongs here. */
+  var LUXE_FORM = {
+    endpoint:       "https://forms.luxeprotectionfilms.com/api/quote",
+    successMessage: "Thank you — your inquiry has gone to Gravity Garage. They will be in touch shortly.",
+    errorMessage:   "Something went wrong sending your request. Please call Gravity Garage directly."
+  };
+
   var track = window.SITE_TRACK || function () {};
 
-  function set(v) { return typeof v === "string" && v.trim() && v.trim() !== "PENDING"; }
   function all(sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); }
 
   var EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
   var DIGITS_RE = /\d/g;
 
-  /* ---------- attribution ----------
-     UTM values are captured on first page view and held for the session,
-     so a visitor who lands from a campaign, browses, and only submits
-     three pages later still carries the correct source. Without this the
-     UTMs are lost the moment they click an internal link.
-     sessionStorage is used deliberately: it is first-party, cleared when
-     the tab closes, and holds no personal data. */
+  /* The handler reads an allowlist and discards everything else. These are
+     those names. Filtering here too means what leaves the browser is
+     identical to what the server will actually keep — so a field that
+     silently vanishes is visible in devtools, not a mystery. */
+  var ALLOWED = [
+    "first_name", "last_name", "phone", "email",
+    "vehicle_year", "vehicle_make", "vehicle_model",
+    "service", "film_interest", "color_interest", "timeframe", "comments",
+    "company_name", "city", "business_type", "interest", "volume",
+    "company"
+  ];
 
-  var UTM_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term"];
-  var STORE_KEY = "luxe_hub_attribution";
+  var REQUIRED = ["first_name", "last_name", "phone", "email"];
 
-  function readStore() {
-    try { return JSON.parse(window.sessionStorage.getItem(STORE_KEY)) || {}; }
-    catch (e) { return {}; }
-  }
+  /* Trade enquiries collect more than the shared allowlist carries. Rather
+     than drop that context — a shop's website, what they run today, whether
+     they would collect locally, all of which shape how the hub replies — it
+     is folded into `comments`, which IS on the allowlist. Labelled, so
+     whoever reads the email can see what came from where. */
+  var FOLD_INTO_COMMENTS = [
+    ["role",                  "Role"],
+    ["website_or_social",     "Website / social"],
+    ["state",                 "State"],
+    ["current_brands",        "Currently runs"],
+    ["local_pickup_interest", "Local pickup"]
+  ];
 
-  function attribution() {
-    var saved = readStore();
-    var params;
-    try { params = new URLSearchParams(window.location.search); }
-    catch (e) { params = null; }
+  var LANE = {
+    availabilityForm: "Film availability check",
+    retailForm:       "Vehicle owner — quote / installation",
+    tradeForm:        "Installer / dealer — local supply"
+  };
 
-    var fresh = {};
-    if (params) {
-      UTM_KEYS.forEach(function (k) {
-        var v = params.get(k);
-        if (v) fresh[k] = v.slice(0, 200);
-      });
-    }
-
-    // First touch wins unless this visit carries new campaign parameters.
-    if (Object.keys(fresh).length) {
-      if (!saved.referrer) fresh.referrer = document.referrer || "";
-      if (!saved.landing_page) fresh.landing_page = window.location.href;
-      try { window.sessionStorage.setItem(STORE_KEY, JSON.stringify(fresh)); } catch (e) {}
-      return fresh;
-    }
-
-    if (!Object.keys(saved).length) {
-      saved = { referrer: document.referrer || "", landing_page: window.location.href };
-      try { window.sessionStorage.setItem(STORE_KEY, JSON.stringify(saved)); } catch (e) {}
-    }
-    return saved;
-  }
-
-  // Capture on page load, not at submit time. By the time someone fills in a
-  // form they have usually clicked through to an internal anchor, and the
-  // campaign parameters are no longer in the URL — running this only at
-  // submit silently loses every UTM.
-  attribution();
-
-  /* ---------- validation ---------- */
+  /* ---------- field-level validation ---------- */
 
   function messageFor(field) {
     var value = (field.value || "").trim();
-    var label = field.closest(".field");
-    var name = label ? (label.querySelector("label").textContent || "").replace(/\(.*\)/, "").trim() : "This field";
+    var wrap = field.closest(".field");
+    var label = wrap && wrap.querySelector("label");
+    var name = label ? (label.textContent || "").replace(/\(.*\)/, "").trim() : "This field";
 
     if (!value) {
       if (field.tagName === "SELECT") return "Please choose an option.";
       return "Please enter your " + name.toLowerCase() + ".";
     }
     if (field.type === "email" && !EMAIL_RE.test(value)) {
-      return "Please enter a valid email address.";
+      return "That email address doesn't look right — please check it.";
     }
     if (field.type === "tel") {
       var digits = value.match(DIGITS_RE);
@@ -94,7 +96,6 @@
 
     if (message) {
       field.setAttribute("aria-invalid", "true");
-      // Point at the real element id so assistive tech actually reads the error.
       if (slot && slot.id) field.setAttribute("aria-describedby", slot.id);
     } else {
       field.removeAttribute("aria-invalid");
@@ -110,180 +111,75 @@
   }
 
   function validateForm(form) {
-    var fields = all("input[required], select[required], textarea[required]", form);
     var firstBad = null;
-
-    fields.forEach(function (field) {
+    all("input[required], select[required], textarea[required]", form).forEach(function (field) {
       if (!validateField(field) && !firstBad) firstBad = field;
     });
-
-    if (firstBad) {
-      firstBad.focus();
-      return false;
-    }
+    if (firstBad) { firstBad.focus(); return false; }
     return true;
+  }
+
+  /* ---------- the confirmation panel ----------
+     A bordered card, not a line of text. These forms sit near the bottom of
+     a long page; a small grey sentence under the button is exactly what
+     someone scrolls past before submitting a second time because they could
+     not tell whether the first one worked. */
+
+  var PANEL = {
+    ok:   { icon: "✓", title: "Request sent" },
+    err:  { icon: "!",      title: "Not sent" },
+    busy: { icon: "·", title: "Sending" }
+  };
+
+  function say(form, message, state) {
+    var el = form.querySelector(".formstatus");
+    if (!el) return;
+
+    if (!message) { el.className = "formstatus"; return; }
+
+    var look = PANEL[state] || PANEL.busy;
+    el.querySelector(".formstatus__ico").textContent = look.icon;
+    el.querySelector(".formstatus__t").textContent = look.title;
+    el.querySelector(".formstatus__m").textContent = message;
+    el.className = "formstatus is-on formstatus--" + (state || "busy");
+
+    if (state !== "busy") {
+      try { el.scrollIntoView({ behavior: "smooth", block: "center" }); }
+      catch (e) { el.scrollIntoView(); }
+    }
   }
 
   /* ---------- payload ---------- */
 
-  function collect(form, formName) {
-    var data = { form: formName };
+  function collect(form) {
+    var raw = {};
     all("input, select, textarea", form).forEach(function (field) {
-      if (!field.name || field.name === "company") return; // skip honeypot
+      if (!field.name) return;
       var value = (field.value || "").trim();
-      if (value) data[field.name] = value;
+      if (value) raw[field.name] = value;
     });
-    /* ---- lead routing + attribution ----
-       These field names are what the CRM maps against. Changing them
-       means remapping the destination form, so keep them stable. */
 
-    var attr = attribution();
+    var extra = [];
+    FOLD_INTO_COMMENTS.forEach(function (pair) {
+      if (raw[pair[0]]) extra.push(pair[1] + ": " + raw[pair[0]]);
+    });
 
-    /* Zoho's Lead_Source is a picklist — an arbitrary string is silently
-       dropped, so send the exact allowed value and keep the descriptive
-       detail alongside it. */
-    data.Lead_Source  = CFG.leadSource || "Website Leads";
-    data.lead_source_detail = "Gravity Garage Regional Hub Website — Southern California";
-    data.inquiry_type = data.purpose || INQUIRY_BY_FORM[formName] || "General enquiry";
-    data.audience     = AUDIENCE_BY_FORM[formName] || "Unknown";
-    data.hub          = "Southern California — Santa Clarita / Valencia";
+    var lane = LANE[form.id];
+    var note = raw.comments || "";
+    var block = (lane ? ["Enquiry: " + lane] : []).concat(extra);
+    if (block.length) note = (note ? note + "\n\n" : "") + block.join("\n");
+    if (note) raw.comments = note;
 
-    // Assemble a readable vehicle string for the CRM without losing the
-    // individual fields, which are more useful for filtering.
-    if (data.vehicle_year || data.vehicle_make || data.vehicle_model) {
-      data.vehicle = [data.vehicle_year, data.vehicle_make, data.vehicle_model]
-        .filter(Boolean).join(" ");
-    }
-
-    /* ---- Zoho Leads field names ----
-       Mapped here rather than in the Zap, so the CRM side is a straight
-       field-for-field copy with no translation step to get wrong.
-       Last_Name is mandatory in Zoho; the form enforces it. */
-    data.First_Name = data.first_name || "";
-    data.Last_Name  = data.last_name  || data.first_name || "Website enquiry";
-    data.Email      = data.email || "";
-    data.Phone      = data.phone || "";
-    if (data.company_name) data.Company = data.company_name;
-    if (data.city)  data.City  = data.city;
-    if (data.state) data.State = data.state;
-    if (data.website_or_social) data.Website = data.website_or_social;
-
-    // Custom fields that already exist on the LUXE Leads layout.
-    if (data.business_type)   data.LV26_Business_Type      = data.business_type;
-    if (data.monthly_volume)  data.LV26_Monthly_PPF_Volume = data.monthly_volume;
-    if (data.role)            data.LV26_Role               = data.role;
-
-    data.page_url     = window.location.href;
-    data.referring_url = attr.referrer || document.referrer || "";
-    data.landing_page = attr.landing_page || "";
-    data.utm_source   = attr.utm_source   || "";
-    data.utm_medium   = attr.utm_medium   || "";
-    data.utm_campaign = attr.utm_campaign || "";
-    data.utm_content  = attr.utm_content  || "";
-    data.utm_term     = attr.utm_term     || "";
-    data.submitted_at = new Date().toISOString();
-
-    // Kept for backwards compatibility with the original payload shape.
-    data.page = data.page_url;
-    data.submitted = data.submitted_at;
-
-    // Everything a salesperson wants at a glance, in one readable block.
-    var desc = [];
-    desc.push("Source: Gravity Garage Regional Hub (Santa Clarita / Valencia)");
-    desc.push("Enquiry: " + data.inquiry_type);
-    if (data.vehicle)          desc.push("Vehicle: " + data.vehicle);
-    if (data.service)          desc.push("Service: " + data.service);
-    if (data.product_interest) desc.push("Product interest: " + data.product_interest);
-    if (data.color_interest)   desc.push("Color interest: " + data.color_interest);
-    if (data.film)             desc.push("Film line: " + data.film);
-    if (data.timeframe)        desc.push("Timeframe: " + data.timeframe);
-    if (data.current_brands)   desc.push("Currently runs: " + data.current_brands);
-    if (data.local_pickup_interest) desc.push("Local pickup: " + data.local_pickup_interest);
-    if (data.account_interest) desc.push("Account interest: " + data.account_interest);
-    if (data.message)          desc.push("", "Message: " + data.message);
-    if (data.notes)            desc.push("", "Notes: " + data.notes);
-    var utm = [data.utm_source, data.utm_medium, data.utm_campaign].filter(Boolean).join(" / ");
-    if (utm) desc.push("", "Campaign: " + utm);
-    desc.push("Page: " + data.page_url);
-    data.Description = desc.join("\n");
-
-    // Formspree-specific hints: make the notification email readable and
-    // let "Reply" go straight back to the enquirer. Harmless on other
-    // endpoints, which simply ignore keys they don't recognise.
-    var who = [data.first_name, data.last_name].filter(Boolean).join(" ");
-    data.name = who;   // kept for the mailto fallback and legacy endpoints
-    data._subject = "LUXE SoCal Hub — " + data.inquiry_type + (who ? " — " + who : "");
-    if (data.email) data._replyto = data.email;
-
-    return data;
-  }
-
-  var INQUIRY_BY_FORM = {
-    availability: "Local film availability",
-    retail:       "Vehicle owner — PPF quote / installation",
-    trade:        "Installer / dealer — local supply"
-  };
-
-  /* Which side of the business a lead belongs to. Routed on at the CRM,
-     so retail installation goes to the Gravity operational contact and
-     trade enquiries reach LUXE. */
-  var AUDIENCE_BY_FORM = {
-    availability: "Trade or retail — availability",
-    retail:       "Retail",
-    trade:        "Trade"
-  };
-
-  /* Some endpoints (Zoho Forms / Zoho CRM webforms, and most classic
-     form handlers) expect url-encoded fields rather than a JSON body.
-     Set formEncoding: "form" in site-config.js for those. */
-  function encodeBody(data) {
-    if ((CFG.formEncoding || "json").toLowerCase() === "form") {
-      var params = new URLSearchParams();
-      Object.keys(data).forEach(function (k) { params.append(k, data[k]); });
-      return { body: params.toString(), type: "application/x-www-form-urlencoded" };
-    }
-    return { body: JSON.stringify(data), type: "application/json" };
-  }
-
-  function mailtoFallback(data, formName) {
-    var to = set(CFG.fallbackEmail) ? CFG.fallbackEmail : "";
-    if (!to) return false;
-
-    var subject = "Website enquiry — " + (data.purpose || formName);
-    var lines = Object.keys(data)
-      .filter(function (k) { return k.charAt(0) !== "_" && k !== "page" && k !== "submitted"; })
-      .map(function (k) {
-        var label = k.charAt(0).toUpperCase() + k.slice(1);
-        return label + ": " + data[k];
-      });
-    lines.push("", "Sent from " + data.page);
-
-    window.location.href =
-      "mailto:" + to +
-      "?subject=" + encodeURIComponent(subject) +
-      "&body=" + encodeURIComponent(lines.join("\n"));
-
-    return true;
-  }
-
-  /* ---------- status ---------- */
-
-  function status(form, message, state) {
-    var el = form.querySelector(".form__status");
-    if (!el) return;
-    el.textContent = message;
-    if (state) el.setAttribute("data-state", state);
-    else el.removeAttribute("data-state");
+    var payload = {};
+    ALLOWED.forEach(function (key) { if (raw[key]) payload[key] = raw[key]; });
+    return payload;
   }
 
   /* ---------- wiring ---------- */
 
-  function wire(form, formName) {
+  function wire(form) {
     if (!form) return;
 
-    var loadedAt = Date.now();
-
-    // Clear the error the moment the visitor starts fixing it.
     all("input, select, textarea", form).forEach(function (field) {
       field.addEventListener("input", function () {
         if (field.getAttribute("aria-invalid") === "true") validateField(field);
@@ -296,90 +192,75 @@
     form.addEventListener("submit", function (e) {
       e.preventDefault();
 
-      // Honeypot — silently accept and discard.
-      var trap = form.querySelector('input[name="company"]');
+      /* Honeypot. The server accepts and silently discards, so the page does
+         the same and shows success. A human whose password manager helpfully
+         filled a hidden field called Company would otherwise click submit
+         and get nothing at all — no error, no confirmation, a dead button. */
+      var trap = form.company;
       if (trap && trap.value) {
-        status(form, "Thanks — your request has been received.", "ok");
         form.reset();
+        say(form, LUXE_FORM.successMessage, "ok");
         return;
       }
 
-      // Time trap. A human cannot read these fields and fill them in under
-      // two seconds; scripted submissions routinely do it in milliseconds.
-      // Silently accepted so bots get no signal about why it failed.
-      if (Date.now() - loadedAt < 2000) {
-        status(form, "Thanks — your request has been received.", "ok");
-        form.reset();
+      var missing = REQUIRED.filter(function (n) {
+        return !form[n] || !form[n].value.trim();
+      });
+      if (missing.length) {
+        validateForm(form);
+        say(form, "Please complete your name, phone and email.", "err");
+        if (form[missing[0]]) form[missing[0]].focus();
         return;
       }
-
-      status(form, "");
+      if (!EMAIL_RE.test(form.email.value.trim())) {
+        showError(form.email, "That email address doesn't look right — please check it.");
+        say(form, "That email address doesn't look right — please check it.", "err");
+        form.email.focus();
+        return;
+      }
       if (!validateForm(form)) {
-        status(form, "Please check the highlighted fields.", "error");
+        say(form, "Please check the highlighted fields.", "err");
         return;
       }
 
       var button = form.querySelector('button[type="submit"]');
-      var originalLabel = button ? button.textContent : "";
-      var data = collect(form, formName);
-
-      // No endpoint configured yet → email fallback so leads are never lost.
-      if (!set(CFG.formEndpoint)) {
-        if (mailtoFallback(data, formName)) {
-          status(form, "Opening your email app to send this request…", "ok");
-          track("form_submit", { form: formName, method: "mailto", inquiry_type: data.inquiry_type });
-        } else {
-          status(form, "This form isn't connected yet. Please call us instead.", "error");
-        }
-        return;
-      }
+      var label = button ? button.textContent : "";
+      var payload = collect(form);
 
       if (button) { button.disabled = true; button.textContent = "Sending…"; }
-      status(form, "Sending your request…");
+      say(form, "Sending your request…", "busy");
 
-      var payload = encodeBody(data);
-
-      fetch(CFG.formEndpoint, {
+      fetch(LUXE_FORM.endpoint, {
         method: "POST",
-        headers: { "Content-Type": payload.type, "Accept": "application/json" },
-        body: payload.body
+        headers: { "Content-Type": "application/json", "Accept": "application/json" },
+        body: JSON.stringify(payload)
       })
         .then(function (res) {
-          if (!res.ok) throw new Error("Request failed: " + res.status);
+          if (!res.ok) { var er = new Error(res.status); er.status = res.status; throw er; }
           form.reset();
-          // Only promise an acknowledgement email once one actually exists.
-          // Set autoResponse: true in site-config.js after the endpoint's
-          // autoresponder is switched on.
-          status(form, CFG.autoResponse
-            ? "Thank you — your request has been received. A confirmation is on its way to " +
-              (data.email || "your inbox") + ", and the team will follow up shortly."
-            : "Thank you — your request has been received. The team will follow up shortly.", "ok");
-          track("form_submit", {
-            form: formName,
-            method: "endpoint",
-            audience: data.audience,
-            inquiry_type: data.inquiry_type,
-            purpose: data.purpose || ""
-          });
-          // Distinct event names make these easy to mark as separate
-          // conversions in GA4 without custom-dimension work.
-          track(formName === "trade" ? "lead_installer_dealer"
-              : formName === "retail" ? "lead_ppf_quote"
-              : "lead_film_availability",
-              { audience: data.audience });
+          say(form, LUXE_FORM.successMessage, "ok");
+          track("form_submit", { form: form.id, lane: LANE[form.id] || "" });
+          track(form.id === "tradeForm" ? "lead_installer_dealer"
+              : form.id === "retailForm" ? "lead_ppf_quote"
+              : "lead_film_availability", {});
         })
-        .catch(function () {
-          status(form, "That didn't send. Please try again in a moment, or call the hub and we'll take care of it.", "error");
-          track("form_error", { form: formName, inquiry_type: data.inquiry_type });
+        .catch(function (err) {
+          /* One case deserves its own wording. Telling someone who has just
+             submitted twice that "something went wrong" sends them to the
+             phone over a problem that isn't one. */
+          say(form, err && err.status === 429
+            ? "We have already received several requests from this connection. Give it a few minutes, or call Gravity Garage and they will take the details over the phone."
+            : LUXE_FORM.errorMessage, "err");
+          track("form_error", { form: form.id, status: (err && err.status) || 0 });
         })
         .then(function () {
-          if (button) { button.disabled = false; button.textContent = originalLabel; }
+          if (button) { button.disabled = false; button.textContent = label; }
         });
     });
   }
 
-  wire(document.getElementById("availabilityForm"), "availability");
-  wire(document.getElementById("retailForm"), "retail");
-  wire(document.getElementById("tradeForm"), "trade");
+  wire(document.getElementById("availabilityForm"));
+  wire(document.getElementById("retailForm"));
+  wire(document.getElementById("tradeForm"));
 
 })();

@@ -15,9 +15,8 @@
    Business name . Gravity Garage
    Hours ......... Mon–Fri 9:00am–5:00pm, weekends closed
 
-   Still open: a dedicated hub email address (falls back to
-   corporate@luxeprotectionfilms.com) and a named hub staff contact
-   for lead routing. Neither blocks launch.
+   Still open: a named hub staff contact. Lead routing is NOT set
+   here — see the form-delivery note below.
 
    If any value here is blanked out, the site hides that element
    rather than showing a placeholder.
@@ -81,30 +80,30 @@ window.SITE_CONFIG = {
 
   /* ---------- 3 · FORM DELIVERY --------------------------- */
   /*
-     Where form submissions are sent. Any endpoint accepting a POST
-     works — Zoho Forms, a Zoho CRM webform, Formspree, a Zapier
-     catch hook, or a custom handler.
+     THERE IS NOTHING TO CONFIGURE HERE, AND THAT IS DELIBERATE.
 
-     PREFERRED — a LUXE-controlled Zoho endpoint, so lead data lands
-     directly in the CRM that LUXE owns.
+     Forms post to the shared LUXE handler at
+     forms.luxeprotectionfilms.com. That service decides who receives a
+     lead from the request's Origin header — something a web page cannot
+     forge — so the recipient never travels through the browser and a
+     visitor cannot edit the page to redirect a submission.
 
-     Zoho and most classic form handlers expect url-encoded fields
-     rather than a JSON body. Set formEncoding to "form" for those.
+     Consequences worth knowing before you go looking for a setting:
+
+       · There is no formEndpoint, formEncoding, fallbackEmail or
+         leadSource key any more. They were removed, not renamed. Any
+         recipient address reachable from client JavaScript is readable
+         and editable by anyone who opens devtools.
+       · To change where Gravity Garage's leads go, edit GG_LEAD_EMAIL
+         on the DigitalOcean app. It is an environment-variable change,
+         not a code change and not a redeploy of this site.
+       · Until that variable is set, the handler routes Gravity Garage
+         leads to LUXE with the subject prefixed [ROUTING NOT SET].
+         Leads are never dropped for want of configuration.
+
+     The client contract lives in assets/js/forms.js and is three keys:
+     endpoint, successMessage, errorMessage.
   */
-  formEndpoint: "",
-  formEncoding: "json",          // "json" or "form"
-
-  // Set to true only once the endpoint's autoresponder is switched on.
-  // Controls whether the success message promises a confirmation email.
-  autoResponse: false,
-
-  // Zoho CRM's Lead_Source is a PICKLIST. This must be one of its allowed
-  // values or Zoho silently drops it. "Website Leads" is the existing option.
-  // The descriptive detail rides along in lead_source_detail and Description.
-  leadSource: "Website Leads",
-
-  // Used only for the mailto fallback when formEndpoint is blank.
-  fallbackEmail: "corporate@luxeprotectionfilms.com",
 
   // Linked from the consent line beneath both forms.
   privacyUrl: "https://luxeprotectionfilms.com/privacy-policy/",
