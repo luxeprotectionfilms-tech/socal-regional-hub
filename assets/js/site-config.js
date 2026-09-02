@@ -71,8 +71,8 @@ window.SITE_CONFIG = {
        { name: "Nardo Circuit Gray", line: "Color Series · Gloss", hex: "#9a9c9b" },
        { name: "Satin Cherry",       line: "Color Series · Satin", hex: "#7d1220" },
 
-     `hex` is an approximate UI swatch for the little colour dot only.
-     It is not a colour-accurate representation of the film.
+     `hex` is an approximate UI swatch for the little color dot only.
+     It is not a color-accurate representation of the film.
      Empty array => the whole block stays hidden.
   */
   stockedColors: [],

@@ -186,7 +186,7 @@
     rImg.alt = c[0] + " (" + c[1] + ") shown on a vehicle";
     rImg.src = DATA.renderBase + c[1].toLowerCase() + ".jpg";
 
-    // The CTAs. Colour travels to the hub's own quote form as a query
+    // The CTAs. Color travels to the hub's own quote form as a query
     // parameter, so the enquiry arrives with the finish already attached.
     var enc = encodeURIComponent(c[0] + " (" + c[1] + ")");
     doc.getElementById("deckmQuote").href = "../?color=" + enc + "#quote";
@@ -239,7 +239,7 @@
       if (!hydrate()) render();
 
       // Deep link: /color-deck/?code=TPU-5008 opens that finish directly,
-      // so outreach can point at one specific colour.
+      // so outreach can point at one specific color.
       try {
         var code = new URLSearchParams(window.location.search).get("code");
         if (code) {

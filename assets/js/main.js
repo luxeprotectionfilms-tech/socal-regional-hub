@@ -284,25 +284,47 @@
        Search engines are entitled to discount content hidden by CSS, and
        that would be most of what this page is for.
 
-       So: if nothing has scrolled after a few seconds, assume nobody is
-       scrolling and reveal everything. A human who has genuinely sat still
-       that long loses an animation they were not watching; a crawler gets
-       the whole page. */
+       The sweep runs once scrolling has been idle for a few seconds, and
+       what it reveals depends on whether anything has scrolled at all:
 
-    var scrolled = false;
-    var onScroll = function () {
-      scrolled = true;
-      window.removeEventListener("scroll", onScroll);
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
+         nothing ever scrolled  → reveal EVERYTHING. Nobody is driving, so
+                                  this is a renderer, and it needs the page.
+         scrolled, now idle     → reveal everything at or above the current
+                                  viewport. Content the visitor has already
+                                  passed can never be left invisible, while
+                                  anything still below the fold keeps its
+                                  entrance animation.
 
-    window.setTimeout(function () {
-      if (scrolled) return;
+       The earlier version simply cancelled on the first scroll event, which
+       left a hole: one programmatic jump — a crawler that scrolls once, an
+       anchor link, a screenshot tool — disarmed the safety net entirely and
+       then revealed only whatever happened to intersect on the way. */
+
+    var everScrolled = false;
+    var idle = null;
+
+    function sweep() {
+      var limit = everScrolled ? window.innerHeight : Infinity;
       reveals.forEach(function (el) {
-        el.classList.add("is-in");
-        io.unobserve(el);
+        if (el.classList.contains("is-in")) return;
+        if (el.getBoundingClientRect().top < limit) {
+          el.classList.add("is-in");
+          io.unobserve(el);
+        }
       });
-    }, 4000);
+    }
+
+    function arm() {
+      window.clearTimeout(idle);
+      idle = window.setTimeout(sweep, 4000);
+    }
+
+    window.addEventListener("scroll", function () {
+      everScrolled = true;
+      arm();
+    }, { passive: true });
+
+    arm();
   }
 
 
@@ -398,7 +420,7 @@
         colorField.value = color;
         colorField.dispatchEvent(new Event("input", { bubbles: true }));
       }
-      // Colour change implies Color Series — preselect it, but never
+      // Color change implies Color Series — preselect it, but never
       // overwrite a choice the visitor already made.
       var product = one("#r-product");
       if (product && !product.value) product.value = "Color Series";
@@ -428,8 +450,8 @@
 
   // Deep links: /#trade or /#quote open the matching form directly, so
   // outreach emails and Instagram links can point at the right lane.
-  // ?color=… arrives from the colour deck and pre-fills the finish, so a
-  // visitor who picked a colour never has to retype it.
+  // ?color=… arrives from the color deck and pre-fills the finish, so a
+  // visitor who picked a color never has to retype it.
   (function () {
     var h = (window.location.hash || "").toLowerCase();
     var color = null;
@@ -465,7 +487,7 @@
   })();
 
 
-  /* ══════════ 5b · LOCALLY STOCKED COLOURS ══════════ */
+  /* ══════════ 5b · LOCALLY STOCKED COLORS ══════════ */
   /*
      Driven entirely from site-config.js so the LUXE team can change what is
      featured without touching markup. Empty array => the block stays hidden,
