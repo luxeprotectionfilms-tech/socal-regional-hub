@@ -76,7 +76,7 @@
 }
 
 /* Swatch artwork unavailable — show the TPU code so the deck still reads as
-   a catalogue rather than a grid of empty boxes. */
+   a catalog rather than a grid of empty boxes. */
 .deck-noart .dtile__sw::after,
 .deck-noart .deckm__swatch::after{
   content:attr(data-fallback);

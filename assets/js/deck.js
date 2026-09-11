@@ -1,10 +1,10 @@
 /* ============================================================
    deck.js — LUXE Color Deck, Southern California hub edition
    ------------------------------------------------------------
-   Same 175-film catalogue as the LUXE digital deck, but every
+   Same 175-film catalog as the LUXE digital deck, but every
    action routes into THIS hub's forms. That is the whole point:
    a visitor who finds a finish here should become a Gravity
-   Garage enquiry, not a click back into the national store.
+   Garage inquiry, not a click back into the national store.
    ============================================================ */
 
 (function () {
@@ -187,7 +187,7 @@
     rImg.src = DATA.renderBase + c[1].toLowerCase() + ".jpg";
 
     // The CTAs. Color travels to the hub's own quote form as a query
-    // parameter, so the enquiry arrives with the finish already attached.
+    // parameter, so the inquiry arrives with the finish already attached.
     var enc = encodeURIComponent(c[0] + " (" + c[1] + ")");
     doc.getElementById("deckmQuote").href = "../?color=" + enc + "#quote";
     doc.getElementById("deckmStock").href = "../?color=" + enc + "#availability";

@@ -406,8 +406,8 @@
 
   /* ── COLOR DECK ──
      Clicking a finish carries it into the hub's own quote form instead of
-     sending the visitor out to the LUXE catalogue. The whole point of the
-     regional page is that the enquiry lands here, not back upstream. */
+     sending the visitor out to the LUXE catalog. The whole point of the
+     regional page is that the inquiry lands here, not back upstream. */
 
   all("[data-color]").forEach(function (chip) {
     chip.addEventListener("click", function () {
@@ -439,11 +439,11 @@
     });
   });
 
-  // Outbound clicks to the LUXE catalogue are tracked separately so the
+  // Outbound clicks to the LUXE catalog are tracked separately so the
   // leak back upstream stays measurable.
   all(".film__link--out").forEach(function (el) {
     el.addEventListener("click", function () {
-      track("outbound_luxe_catalogue", { url: el.getAttribute("href") || "" });
+      track("outbound_luxe_catalog", { url: el.getAttribute("href") || "" });
     });
   });
 
@@ -562,7 +562,7 @@
     el.addEventListener("click", function () { track("instagram_click"); });
   });
 
-  // Outbound clicks to the LUXE product catalogue — tells LUXE which lines
+  // Outbound clicks to the LUXE product catalog — tells LUXE which lines
   // the regional traffic is actually researching.
   all('.film__link').forEach(function (el) {
     el.addEventListener("click", function () {

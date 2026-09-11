@@ -810,6 +810,104 @@ em {
   margin: 0;
 }
 
+/* Helper copy under a label, and the photo field's running status. Same
+   metrics as .err — including the reserved line — so a message appearing
+   or clearing never moves the submit button. */
+.field__hint,
+.field__note {
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  color: var(--muted-2);
+  margin: 0;
+}
+.field__note { min-height: 1.1em; }
+
+/* Photo attachments. Built from the tokens the rest of the form already
+   uses — the control is a new field, not a new look. */
+.field input[type="file"] {
+  padding: 0.55rem 0.6rem;
+  font-size: 0.875rem;
+  color: var(--muted);
+  cursor: pointer;
+}
+.field input[type="file"]::file-selector-button {
+  margin-right: 0.85rem;
+  padding: 0.55rem 0.9rem;
+  background: transparent;
+  border: 1px solid #43434D;
+  border-radius: var(--r-sm);
+  color: var(--white);
+  font-family: var(--font-display);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color var(--t-fast), color var(--t-fast);
+}
+.field input[type="file"]::file-selector-button:hover {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+.photos {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.photos:empty { display: none; }
+
+.photo {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  max-width: 100%;
+  padding: 0.35rem 2.25rem 0.35rem 0.35rem;
+  background: #0E0E10;
+  border: 1px solid #313139;
+  border-radius: var(--r-sm);
+}
+.photo img {
+  display: block;
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  border-radius: 2px;
+}
+.photo__n {
+  font-size: 0.8125rem;
+  color: var(--muted);
+  max-width: 11rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.photo__x {
+  position: absolute;
+  top: 50%;
+  right: 0.35rem;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  color: var(--muted-2);
+  font-size: 1.05rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color var(--t-fast), background-color var(--t-fast);
+}
+.photo__x:hover { color: var(--white); background: #26262C; }
+.photo__x:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
+
 /* Honeypot */
 .hp {
   position: absolute !important;
@@ -1319,7 +1417,7 @@ section[id], div[id="availability"], div[id="stocked"] { scroll-margin-top: 96px
   margin-bottom: var(--sp-4);
 }
 
-/* Local action first, LUXE catalogue link demoted to a quiet secondary. */
+/* Local action first, LUXE catalog link demoted to a quiet secondary. */
 .film__acts { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sp-3); margin-top: var(--sp-4); }
 .film__cta {
   display: inline-flex;

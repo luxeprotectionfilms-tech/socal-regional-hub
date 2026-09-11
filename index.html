@@ -103,7 +103,7 @@
       "name": "I run a shop. Can I buy LUXE film here rather than waiting on a shipment?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "That is one of the reasons the hub exists. It is a local point of contact for approved installers, dealers, product enquiries, availability requests, and supply. Installers working locally can collect stocked items the same day instead of waiting on a delivery. Trade enquiries are handled on a separate path from retail ones, so they reach the right person first time. Contact the hub about supply ."
+        "text": "That is one of the reasons the hub exists. It is a local point of contact for approved installers, dealers, product inquiries, availability requests, and supply. Installers working locally can collect stocked items the same day instead of waiting on a delivery. Trade inquiries are handled on a separate path from retail ones, so they reach the right person first time. Contact the hub about supply ."
       }
     },
     {
@@ -259,14 +259,14 @@
         <p class="eyebrow">Local Availability</p>
         <h2 class="h2" id="stockTitle">LUXE inventory<br><em>available locally</em></h2>
         <p>Select LUXE films are stocked at the Southern California hub. Availability changes by product line, finish, width, and quantity.</p>
-        <p>Submit a request and the team will confirm current availability before pickup, ordering, or installation.</p>
+        <p>Send a request and the team confirms what is actually on the rack before you drive out, order, or book installation.</p>
       </div>
 
       <div class="card form-card reveal" id="availability">
         <h3 class="h3">Buy LUXE Film Locally</h3>
         <!-- Field names are the shared LUXE handler's allowlist, not free choice.
-             Anything not on that list is discarded server-side, and the four
-             below are required or the submission is rejected outright. -->
+             Anything not on that list is discarded server-side. Name and email
+             are required; phone is offered, not demanded. -->
         <form class="form form--compact" id="availabilityForm" novalidate>
           <div class="grid-2">
             <div class="field">
@@ -282,8 +282,8 @@
           </div>
           <div class="grid-2">
             <div class="field">
-              <label for="av-phone">Phone</label>
-              <input id="av-phone" name="phone" type="tel" autocomplete="tel" required>
+              <label for="av-phone">Phone <span class="opt">(optional)</span></label>
+              <input id="av-phone" name="phone" type="tel" autocomplete="tel">
               <p class="err" id="av-phone-err" role="alert" data-err-for="av-phone"></p>
             </div>
             <div class="field">
@@ -310,7 +310,7 @@
             <p class="err" id="av-film-err" role="alert" data-err-for="av-film"></p>
           </div>
           <div class="field">
-            <label for="av-notes">Width, quantity range, or timing <span class="opt">(optional)</span></label>
+            <label for="av-notes">Width, quantity, or when you need it <span class="opt">(optional)</span></label>
             <textarea id="av-notes" name="comments" rows="2"></textarea>
           </div>
           <div class="hp" aria-hidden="true"><label for="av-company">Company</label><input id="av-company" name="company" type="text" tabindex="-1" autocomplete="off"></div>
@@ -462,7 +462,7 @@
         </div>
 
         <div class="deck__cta">
-          <p class="deck__note">Tap any finish above to start an enquiry with it attached, or open the full 175-finish color deck. Locally stocked colors vary — the hub confirms what is available to view or order.</p>
+          <p class="deck__note">Tap any finish above to start an inquiry with it attached, or open the full 175-finish color deck. Locally stocked colors vary — the hub confirms what is available to view or order.</p>
           <div class="btn-row">
             <a class="btn btn--gold" href="color-deck/">Browse All 175 Finishes</a>
             <a class="btn btn--ghost" href="#contact" data-cta="quote">Contact Gravity Garage</a>
@@ -637,7 +637,7 @@
             <source media="(max-width: 720px)" srcset="assets/images/gravity-detail-bay-mob.jpg">
             <source type="image/webp" srcset="assets/images/gravity-detail-bay.webp">
             <img src="assets/images/gravity-detail-bay.jpg" width="1600" height="900" loading="lazy" decoding="async"
-                 alt="A blacked-out presentation bay at Gravity Garage lined with continuous LED strip lighting, a motorcycle parked in the centre on polished concrete, a LUXE Protection Films banner on the far wall and shelving stocked with product to one side.">
+                 alt="A blacked-out presentation bay at Gravity Garage lined with continuous LED strip lighting, a motorcycle parked in the center on polished concrete, a LUXE Protection Films banner on the far wall and shelving stocked with product to one side.">
           </picture>
           <figcaption>The blacked-out bay. Strip lighting on every wall so a finish has nowhere to hide — which is the point when you are checking film on a dark panel.</figcaption>
         </figure>
@@ -802,7 +802,7 @@
         <details class="faq__item reveal">
           <summary><h3 class="faq__q">I run a shop. Can I buy LUXE film here rather than waiting on a shipment?</h3></summary>
           <div class="faq__a">
-            <p>That is one of the reasons the hub exists. It is a local point of contact for approved installers, dealers, product enquiries, availability requests, and supply. Installers working locally can collect stocked items the same day instead of waiting on a delivery. Trade enquiries are handled on a separate path from retail ones, so they reach the right person first time. <a href="#contact" data-cta="trade">Contact the hub about supply</a>.</p>
+            <p>That is one of the reasons the hub exists. It is a local point of contact for approved installers, dealers, product inquiries, availability requests, and supply. Installers working locally can collect stocked items the same day instead of waiting on a delivery. Trade inquiries are handled on a separate path from retail ones, so they reach the right person first time. <a href="#contact" data-cta="trade">Contact the hub about supply</a>.</p>
           </div>
         </details>
 
@@ -830,11 +830,11 @@
       <header class="section__head reveal">
         <p class="eyebrow">Get In Touch</p>
         <h2 class="h2" id="contactTitle">Two ways to work<br><em>with the SoCal hub</em></h2>
-        <p class="section__lede">Retail installation enquiries and professional supply enquiries are handled separately, so each goes to the right person the first time.</p>
+        <p class="section__lede">Vehicle owners and trade accounts are handled on separate paths, so your request reaches the right person the first time.</p>
       </header>
 
       <div class="tabs reveal">
-        <div class="tabs__bar" role="tablist" aria-label="Choose enquiry type">
+        <div class="tabs__bar" role="tablist" aria-label="Choose inquiry type">
           <button class="tabs__btn is-active" id="tab-retail" role="tab" aria-selected="true" aria-controls="panel-retail" type="button">
             <span class="tabs__k">Vehicle Owner</span>
             <span class="tabs__s">Get a PPF quote or book installation</span>
@@ -849,7 +849,7 @@
         <div class="tabs__panel" id="panel-retail" role="tabpanel" aria-labelledby="tab-retail">
           <div class="card form-card">
             <h3 class="h3">Get a PPF quote</h3>
-            <p class="form__intro">Tell us about the vehicle and what you want protected. The hub will come back with a quote and available dates.</p>
+            <p class="form__intro">Tell us about the car and what you want protected. The SoCal hub comes back with the right LUXE film for it, a price, and the next open dates — straight from the shop that will do the work.</p>
             <form class="form" id="retailForm" novalidate>
               
               <div class="field-row">
@@ -867,8 +867,8 @@
 
               <div class="field-row">
                 <div class="field">
-                  <label for="r-phone">Phone</label>
-                  <input id="r-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required>
+                  <label for="r-phone">Phone <span class="opt">(optional)</span></label>
+                  <input id="r-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="Fastest way to reach you">
                   <p class="err" id="r-phone-err" role="alert" data-err-for="r-phone"></p>
                 </div>
               </div>
@@ -901,7 +901,7 @@
               </fieldset>
 
               <div class="field">
-                <label for="r-service">Desired service</label>
+                <label for="r-service">Coverage</label>
                 <select id="r-service" name="service" required>
                   <option value="">Select a service</option>
                   <option>Full-front paint protection</option>
@@ -916,7 +916,7 @@
 
               <div class="field-row">
                 <div class="field">
-                  <label for="r-product">Film interest</label>
+                  <label for="r-product">LUXE film</label>
                   <select id="r-product" name="film_interest">
                     <option value="">No preference</option>
                     <option>Gloss Is Boss — clear</option>
@@ -933,7 +933,7 @@
               </div>
 
               <div class="field">
-                <label for="r-timing">Desired timeframe</label>
+                <label for="r-timing">Timing</label>
                 <select id="r-timing" name="timeframe">
                   <option value="">No specific date</option>
                   <option>As soon as possible</option>
@@ -944,8 +944,20 @@
               </div>
 
               <div class="field">
-                <label for="r-message">Comments <span class="opt">(optional)</span></label>
-                <textarea id="r-message" name="comments" rows="3" placeholder="Anything else that helps us quote accurately."></textarea>
+                <label for="r-message">Anything else <span class="opt">(optional)</span></label>
+                <textarea id="r-message" name="comments" rows="3" placeholder="Existing chips or swirls, wheels off, film already on the car — anything that helps us quote accurately."></textarea>
+              </div>
+
+              <!-- Photos are resized in the browser before they are sent: a
+                   phone shot goes out at roughly 300 KB, and the handler caps
+                   each one at 2 MB. The input carries no `name` on purpose, so
+                   it can never be swept into the text payload. -->
+              <div class="field">
+                <label for="r-photos">Photos of the car <span class="opt">(optional — up to 3)</span></label>
+                <p class="field__hint" id="r-photos-hint">A couple of quick shots let the team confirm the vehicle and the panels you want covered, so the quote comes back right the first time. JPG, PNG or HEIC from your phone is fine.</p>
+                <input id="r-photos" type="file" accept="image/*" multiple aria-describedby="r-photos-hint">
+                <ul class="photos" id="r-photos-list"></ul>
+                <p class="field__note" id="r-photos-note" role="status" aria-live="polite"></p>
               </div>
 
               <div class="hp" aria-hidden="true"><label for="r-company">Company</label><input id="r-company" name="company" type="text" tabindex="-1" autocomplete="off"></div>
@@ -965,8 +977,8 @@
         <!-- ─────── B · INSTALLER / DEALER / SHOP LEAD ─────── -->
         <div class="tabs__panel is-hidden" id="panel-trade" role="tabpanel" aria-labelledby="tab-trade" hidden>
           <div class="card form-card">
-            <h3 class="h3">Installers &amp; dealers — contact the SoCal hub</h3>
-            <p class="form__intro">Buying LUXE film locally, or interested in becoming an approved installer or dealer? Tell us about the shop and we'll route it to the right team.</p>
+            <h3 class="h3">Installers &amp; dealers — talk to the SoCal hub</h3>
+            <p class="form__intro">Buying LUXE film locally, or looking to become an approved installer or dealer? Tell us about the shop. Trade requests are handled on their own path, so this never lands in the retail queue.</p>
             <form class="form" id="tradeForm" novalidate>
 
               <div class="field-row">
@@ -997,8 +1009,8 @@
                   <p class="err" id="t-email-err" role="alert" data-err-for="t-email"></p>
                 </div>
                 <div class="field">
-                  <label for="t-phone">Phone</label>
-                  <input id="t-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel" required>
+                  <label for="t-phone">Phone <span class="opt">(optional)</span></label>
+                  <input id="t-phone" name="phone" type="tel" autocomplete="tel" inputmode="tel">
                   <p class="err" id="t-phone-err" role="alert" data-err-for="t-phone"></p>
                 </div>
               </div>
@@ -1123,7 +1135,7 @@
               <span class="formstatus__m"></span>
             </span>
           </div>
-              <p class="form__fine">By submitting this form you agree that LUXE Protection Films and Gravity Garage may contact you about your enquiry. Your information is handled in accordance with the <a data-site="privacy" href="https://luxeprotectionfilms.com/privacy-policy/" target="_blank" rel="noopener">LUXE Privacy Policy</a>.</p>
+              <p class="form__fine">By submitting this form you agree that LUXE Protection Films and Gravity Garage may contact you about your inquiry. Your information is handled in accordance with the <a data-site="privacy" href="https://luxeprotectionfilms.com/privacy-policy/" target="_blank" rel="noopener">LUXE Privacy Policy</a>.</p>
             </form>
           </div>
         </div>
